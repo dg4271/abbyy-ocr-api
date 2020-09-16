@@ -1,0 +1,440 @@
+{
+    "caption": [
+        "Table 1. Screening and Testing of SNPs for Association with Body Mass Index on the Basis of the 86,604 SNP Scan in 1,322 Subjects of the Framingham Heart Study: The Top Ten Powered SNPs",
+        "The bold indicates the two SNPs that have been identified as significant",
+        "with the PBAT screening algorithm.",
+        "effects for complex traits can vary by age and that such an interaction can prevent replications if the age-varying character of an association is not taken into account in the selection of both the replication samples and the statis\u00ac tical analysis strategy. Although the importance of age\u00ac dependent genetic effects for BMI has been suggested,15 their incorporation into current genetic analyses is not common. The previously mentioned association between obesity, measured as BMI kg/m2, and a common genetic variant near INSIG2 was identified via a scan of 86,604 SNPs among 923 individuals in the FHS offspring cohort.9 Recently, genotyping of the entire FHS sample with 1322 individuals was completed on the 100K platform, and ge\u00ac netic information for additional 399 subjects became avail\u00ac able. We then reanalyzed the data, using the VanSteen Screening and Testing algorithm for family data.16 Given the availability of longitudinal BMI measurements in the FHS, we selected the family-based association test-princi\u00ac pal components (FBAT-PC) approach, which is particularly suited to detect both genetic main effects and time-varying effects without having to make prior assumptions about the presence of either effect.17 Our reanalysis identified a second common genetic variant (rs1455832) at a different gene locus intronic to the gene roundabout axon guidance receptor, homolog 1 (ROBO1) (AHC [MIM 602430]) that achieved genome-wide significance (unadjusted p value p = 0.000624, Table 1). Because these data were longitudi\u00ac nal in nature (six BMI measurements per person), a profile plot that illustrates the effect of genotype on BMI over time was generated (Figure 1). This plot revealed a genetic effect between rs1455832 and BMI that varies by age (Figure 1). For the minor allele homozygote (CC), we observe a gene-age interaction associated with increased BMI that diminishes after age 45 (see Figure 1). We therefore selected as our replication hypothesis a gene-age interaction where the CC genotype is associated with increased BMI until the age of 45, at which point the effect diminishes."
+    ],
+    "hv": [
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "1"
+        },
+        {
+            "row_header": [
+                "rs1439358"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "1"
+        },
+        {
+            "row_header": [
+                "rs1439358"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.183803"
+        },
+        {
+            "row_header": [
+                "rs1439358"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "22"
+        },
+        {
+            "row_header": [
+                "rs1439358"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.88141"
+        },
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "2"
+        },
+        {
+            "row_header": [
+                "rs1875645"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "1"
+        },
+        {
+            "row_header": [
+                "rs1875645"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.464993"
+        },
+        {
+            "row_header": [
+                "rs1875645"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "69"
+        },
+        {
+            "row_header": [
+                "rs1875645"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.886052"
+        },
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "3"
+        },
+        {
+            "row_header": [
+                "rs9312225"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "1"
+        },
+        {
+            "row_header": [
+                "rs9312225"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.446051"
+        },
+        {
+            "row_header": [
+                "rs9312225"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "70"
+        },
+        {
+            "row_header": [
+                "rs9312225"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.848928"
+        },
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "4"
+        },
+        {
+            "row_header": [
+                "rs2134456"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "1"
+        },
+        {
+            "row_header": [
+                "rs2134456"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.466619"
+        },
+        {
+            "row_header": [
+                "rs2134456"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "72"
+        },
+        {
+            "row_header": [
+                "rs2134456"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.810328"
+        },
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "5"
+        },
+        {
+            "row_header": [
+                "rs10520722"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "2"
+        },
+        {
+            "row_header": [
+                "rs10520722"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.419401"
+        },
+        {
+            "row_header": [
+                "rs10520722"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "65"
+        },
+        {
+            "row_header": [
+                "rs10520722"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.592788"
+        },
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "6"
+        },
+        {
+            "row_header": [
+                "rs778373"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "2"
+        },
+        {
+            "row_header": [
+                "rs778373"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.318246"
+        },
+        {
+            "row_header": [
+                "rs778373"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "43"
+        },
+        {
+            "row_header": [
+                "rs778373"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.835302"
+        },
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "7"
+        },
+        {
+            "row_header": [
+                "rs293287"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "2"
+        },
+        {
+            "row_header": [
+                "rs293287"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.347734"
+        },
+        {
+            "row_header": [
+                "rs293287"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "53"
+        },
+        {
+            "row_header": [
+                "rs293287"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.228776"
+        },
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "8"
+        },
+        {
+            "row_header": [
+                "rs7566605"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "2"
+        },
+        {
+            "row_header": [
+                "rs7566605"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.36771"
+        },
+        {
+            "row_header": [
+                "rs7566605"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "49"
+        },
+        {
+            "row_header": [
+                "rs7566605"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.001879"
+        },
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "9"
+        },
+        {
+            "row_header": [
+                "rs1455832"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "1"
+        },
+        {
+            "row_header": [
+                "rs1455832"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.268188"
+        },
+        {
+            "row_header": [
+                "rs1455832"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "32"
+        },
+        {
+            "row_header": [
+                "rs1455832"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.000624"
+        },
+        {
+            "row_header": [],
+            "col_header": [
+                "Power<br>Rank"
+            ],
+            "value": "10"
+        },
+        {
+            "row_header": [
+                "rs10493150"
+            ],
+            "col_header": [
+                "Allele"
+            ],
+            "value": "2"
+        },
+        {
+            "row_header": [
+                "rs10493150"
+            ],
+            "col_header": [
+                "HWE"
+            ],
+            "value": "0.489362"
+        },
+        {
+            "row_header": [
+                "rs10493150"
+            ],
+            "col_header": [
+                "Informative<br>Families"
+            ],
+            "value": "73"
+        },
+        {
+            "row_header": [
+                "rs10493150"
+            ],
+            "col_header": [
+                "FBAT<br>p Value"
+            ],
+            "value": "0.662261"
+        }
+    ]
+}

@@ -1,0 +1,689 @@
+FTO	FTO gene,Fat mass and obesity-associated (FTO) gene,FTO polymorphisms
+Polymorphism	Gene polymorphism,Genetic polymorphism
+Nutrigenomics	Systems nutrigenomics
+MC4R	MC4R gene,MRC4 neurons
+Personalized	Personalied medicine,Personalized nutrition
+Polimorfismo	Polimorfismo
+Obesity	Pediatrics obesity,Obesity/dyslipidemia,Monogenic obesity,Obese adolescents
+Insulin resistance	Insulin resistance index
+Type diabetes	
+Hepatic steatosis	
+Depression	
+diet	
+Nutrition	Nutrients,Precision nutrition
+weight loss	weight-loss,Weight loss,Weight loss intervention,Weight reduction
+Lifestyle intervention	Lifestyle factors
+waist circumference	wc,waist C,Waist size
+hip circumference	hc,hip C
+waist hip ratio	waist-hip ration,WHR,Waist-to-Hip Ratio,WtHR
+supplementation	dietary supplement,oral administration,intervention,dietary intervention
+Carbohydrate	carbohydrate,dietary carbohydrate
+Protein	Protein,dietary protein
+Fat	fat,dietary fat
+fiber	dietary fiber,dietary fibre
+MUFA	monounsaturated fatty acid
+PUFA	polyunsaturated fatty acid
+SFA	saturated fatty acid
+Vitamin	Vit
+Mineral	
+PA	physical activity
+fat mass	Trunk fat,TBFat,body fat mass
+BMI	body mass index
+Fat Free Mass	Fat-Free Mass,TBLean,lean mass
+Nonviceral fat	
+Viceral fat	
+diastolic blood pressure	DBP
+systolic blood pressure	SBP
+Food intake	
+vO2	
+resting megtabolic rate	RMK
+Body temperature	
+Glucose	glucose,fasting blood glucose,fasting glucose,FBG,FPG
+Insulin	insulin,fasting,Insulinemia,FPI
+HOMR-IR	Homeostatic model assessment-insulin resistance
+AT-IR	adipose tissue insulin resistance
+insulin area under curve	
+HS-CRP	high sensitive C-reactive protein
+C-peptide	
+TG	Triglycerides
+TC	Total cholesterol
+HDL-C	HDL cholesterol,high density lipoprotein cholesterol
+LDL-C	LDL cholesterol,low density lipoprotein cholesterol
+FFA	Free fatty acid
+Plasma- AST	aspartate aminotransferase
+Plasma- ALT	alanine aminotransferase
+Plasma Urea	
+Plasma creatinine	
+Apelin	APLN,APEL,XNPEP2
+Leptin	LEP,LEPD
+Adiponectin	ADIPOQ,ACDC,GBP28
+Resistin	
+Omentin	IL-1
+Vaspin	
+Propionate	
+β-hydroxybutyrate	
+diversity of bacterical speies	
+stress	
+anxiety	
+depression	
+BDI-II	Beck depression inventory
+BDNF	Brian-derived neurotrophic factor
+Back pain intensity score	
+β-oxidation	
+FAS	fatty acid synthesis
+PAP	phoshohydrolase
+TNF-a	
+IL-6	interleukin-6
+CCL2	chemokine(C-C motif) ligand 2
+GLUT-4	
+NF-κB	
+LPS	
+sICAM-1	
+IgG	
+IL-8	interleukin-8
+Apolipoprotein B	
+LDL-C/Apolipoprotein B ratio	
+PPARγ	
+ChREBP	
+SCD1	stearoyl-CoA-desaturase
+CPT	carnitine palmitoyl transferase
+ACAT	acyl-CoA cholesterol esterification
+ADMA	asymmetric dimethylarginine
+SE	Selectin E,selectic E
+RBP4	retinol binding protein 4
+DNA damage	
+PPAR-α(mRNA)	
+MC4R(mRNA)	
+HMG-CoA Reductase	
+2-h plasma glucose	
+Apoliproprotein	A1
+Carbohydrate oxidation	
+Fat oxidation	
+Blood glucose	
+age	Age
+sex	Sex
+male	Male,Man,boy
+female	Female,women,woman,girl,Girl
+BMI	body mass index,Body Mass Index,bmi
+cholesterol	ch,ch.,chol
+25(oh)d	
+5 mthf erythrocytes	
+5 mthf plasma	
+5-mthf erythrocytes	
+5-mthf plasma	
+a	
+aca	
+active	
+activites	
+add1	
+adipoenctin	
+adiponectin	
+adipoq	
+adiposity	
+adoptive parent	
+adrb2	
+african	
+african american	
+age	
+agp a	
+agp-a	
+agtr1	
+airg	
+albumin	
+alcohol	
+alone	
+alt	
+amantadine	
+american	
+amino acids	
+android fat mass	
+angina pectoris	
+animal fat	
+animal protein	
+any	
+any college	
+apoe level	
+apolipoprotein a1	
+apolipoprotein b	
+arginine	
+ash	
+asian	
+aspirin use	
+ast	
+asthenia	
+asthma	
+asymptomatic	
+attertional problems	
+b	
+b-6	
+b-complex	
+ba	
+barium	
+baseline weight	
+behavioral comorbidities	
+behavioral problems	
+biological parent	
+black	
+blood glucose	
+bmi	
+bmi-sds	
+bodily pain	
+body fat	
+body fat percentage	
+body mass index	
+body weight	
+bolidy pain	
+bread	
+bw	
+bypass/angioplasty	
+c	
+c-reactive protein	
+c5	
+c5ctla4	
+cad	
+calcium	
+callbladder trouble	
+cancer	
+candy	
+carbidopa	
+carbidopa/levodopa	
+carbohydrate	
+carbohydrates	
+caregiver job status	
+cca	
+ccl-20	
+ccr2	
+ccr3	
+ccr5	
+cd14	
+cereals	
+chicory	
+chocolate	
+chocolate/candy	
+cholesterol	
+chronic allergies	
+chronic respiratory disease	
+chronic respiratory problem	
+college degree	
+college or more	
+completed high school	
+complex carbohydrates	
+confectionery and biscuits	
+conv	
+copper	
+coronary hear disease	
+crean tea	
+creatinine	
+crp	
+ctla4	
+current	
+current smoker	
+cvd	
+d	
+daily products	
+daily steps	
+dairy	
+dairy portions	
+dairy product	
+dairy products	
+dbp	
+deafness	
+deaths	
+depression	
+dessert bread	
+developmental delay or mental	
+di	
+diabetes during follow up	
+diabetes during follow-up	
+diastolic bp	
+did not graduate from high school	
+diet	
+dietary fiber	
+dietary intake	
+ditetaryfiber	
+divorced	
+divorced/separated/widowed	
+dry matter	
+e	
+eca	
+education	
+egg	
+eight	
+elements	
+emotional limitations	
+emplotment status	
+energy	
+energy intake	
+entacapone	
+ethnicity	
+ever hospitalized	
+excercise	
+expatriates	
+f2	
+f5	
+f7	
+family activities	
+family cohension	
+fasting glucose	
+fasting insulin	
+fat	
+fat and oils	
+fat free mass	
+fat mass	
+fatty acids	
+fe	
+female	
+female gender	
+females	
+ffm	
+fiber	
+fibre	
+fied foods	
+fish	
+five	
+flatulence	
+flavored milk	
+fluits	
+fm	
+folate	
+folic acid	
+former	
+former smoker	
+four	
+free androgen index	
+fresh fish	
+fried chickin	
+fruits	
+fto	
+full time	
+gc	
+gender	
+general behavior	
+general health	
+general perceived health	
+gispanic ethnicity	
+global general behavior	
+global general health	
+glucose	
+glucose 129	
+gm	
+gnb3	
+gps	
+graduate degree	
+grains	
+guardian	
+hamburger	
+hba1c	
+hc	
+hcb	
+hdl	
+hdl ch	
+hdl ch.	
+hdl chol	
+hdl cholesterol	
+hdl-c	
+hdl-ch	
+hdl-ch.	
+health balanced diet	
+heart failure	
+heartburn	
+height	
+hematocrit	
+hemoglobin	
+hemoglobin f	
+hepatomegaly	
+hf	
+high	
+high risk	
+high school	
+high school diploma	
+high school/university	
+highlt active	
+hip circumference	
+hispanic	
+histidine	
+history of cvd	
+history of diabetes	
+hma r units	
+homa	
+homa index	
+homa-irc	
+homa-r units	
+household income	
+household income/year	
+hs-crp	
+ht users	
+hypercholesterolemia	
+hyperlipidemia	
+hypertension	
+hypolipidemic drug	
+ica	
+icam1	
+ice cream	
+il-10	
+il-12p70	
+il-17	
+il-23	
+il-6	
+il1b	
+il1b 511t allele	
+il1b-511t allele	
+il4r	
+il5ra	
+il6	
+il9	
+imporved/no change	
+in couple	
+inactive	
+insoluble fiber	
+insulin	
+insulin 129	
+intracranial arteries	
+iron	
+irregular heart beat	
+irritability	
+isoleucine	
+itga2	
+itgb3	
+jajang mein	
+jajang-mein	
+jaundice	
+juice	
+kimchi	
+lap index	
+ldl ch	
+ldl chol	
+ldl cholesterol	
+ldl-c	
+ldl-ch	
+ldl-ch.	
+ldl-chol	
+ldl-cholesterol	
+learning problems	
+legumes	
+leptin	
+leucine	
+lf	
+lf/hf	
+lgt/diabetes	
+lipids	
+low	
+lp(a)	
+lpa	
+ltc4s	
+lucerne	
+lysine	
+magnesium	
+male	
+male female	
+male:female	
+males	
+mangranese	
+marital status	
+married	
+mc4r	
+mca	
+mcs	
+mda	
+mean	
+meat	
+meat products	
+mental health	
+methionine	
+mg	
+middle	
+minerals	
+mma plasma	
+mmp3	
+mmse	
+moca	
+moca recall score	
+moderate risk	
+moderately active	
+moderately inactive	
+molybdenum	
+monounsaturated fat	
+monounsaturated fatty acid	
+mthfr	
+mthfr 677t	
+mufa	
+mufas	
+multivitamin	
+myocardial infarction	
+n	
+naci taste threshold	
+nationals	
+nausea	
+nefa	
+never	
+never married	
+never smoked	
+never smoker	
+niacin	
+nine	
+no risk	
+no treatment	
+nomal	
+nonwhite	
+normal	
+normal body	
+nos2a	
+nos3	
+not prudent diet	
+not reported	
+not working	
+nppa	
+number	
+nuts	
+obese	
+olive oil	
+one	
+organic	
+orthopedic/bone/joint problems	
+osteoarthritis	
+osteoporosis	
+overall activity	
+overweight	
+pai1	
+parental impact time	
+parental impact-emotional	
+parental impact-time	
+part-time	
+part-time/homemaker	
+past	
+pastries	
+pca	
+pcb 118	
+pcb 138	
+pcb 143	
+pcb 180	
+pcb-118	
+pcb-138	
+pcb-143	
+pcb-180	
+pcs	
+pd duration	
+person year	
+person years	
+person-years	
+phalaris	
+phalaris+lupin	
+phenylalanine	
+phosphorus	
+physical functioning	
+physical health summary	
+physical limitations	
+pizza	
+polymorphism	
+polymorphisms	
+polyunsaturated fat	
+polyunsaturated fatty acids	
+pon1 192r allele	
+pon1 activity	
+postgroduate degree	
+potassium	
+pp distress	
+pparg	
+praental impact emotional	
+pramipexole	
+prealbumin	
+primary school	
+processed fish	
+processed meat	
+processed meat/fish	
+professional	
+protein	
+prudent diet	
+prudentdiet	
+psychosocial health summary	
+pth	
+pufa	
+pufas	
+quit	
+ramen	
+rarely/never	
+rasagiline	
+resistin	
+retardation	
+reticulocytes	
+retired	
+retired/unemplotyed	
+rheumatoid arthritis	
+riboflavin	
+rmr	
+rohrer index	
+role functioning-physical	
+ropinirole	
+rotigotine	
+rp	
+ruq pain	
+s4 skinfolds	
+sa	
+salt	
+satrch	
+saturated fat	
+saturated fatty acid	
+saw palmetto	
+sbp	
+scc	
+scnn1a	
+scya11	
+sdf1	
+se	
+secondary school	
+secondary/high school	
+sedentary	
+sedentary lifestyle	
+sele	
+selegiline	
+selenium	
+self esteem	
+self-esteem	
+selp	
+separated	
+serum protein	
+serum proteins	
+serum retinol	
+seven	
+sex	
+sfa	
+sfas	
+shbg	
+si	
+simple carbohydrates	
+single	
+six	
+skinfold thickness total	
+sleep	
+sleep disorder	
+sleeping disorder	
+smoking	
+smoking status	
+social functioning	
+sodium	
+soft drink	
+soluble fiber	
+some college	
+soup	
+soup/stew	
+speech problems	
+stature	
+stew	
+stress	
+stroke	
+sucrose	
+sucrose taste threshold	
+sugar	
+sum of trunk skinfolds	
+symptomatic	
+systolic blood pressure	
+systolic bp	
+tabacco smoking	
+tac	
+tag	
+tc	
+tcf7	
+tei	
+ten	
+tg	
+tgfb1	
+thcy	
+thiamin	
+three	
+threonine	
+thyroid disorder	
+tibc	
+tmem18	
+tnf	
+tnf-a	
+tofu	
+tolcapone	
+treatment	
+treatment other than rp	
+triacylglycerides	
+triglycerides	
+tt	
+two	
+ugb	
+ulcers	
+unflavored milk	
+university	
+urea	
+us crp	
+us-crp	
+va	
+valine	
+vcam1	
+vdr	
+vegetable	
+vegetable fat	
+vegetable protein	
+vegetables	
+vision	
+vitality	
+vitamin a	
+vitamin b12	
+vitamin b6	
+vitamin c	
+vitamin d	
+vitamin e	
+vitamin e or selenium	
+vitamins	
+vo2	
+vo2 c.	
+vocational school	
+waist circumference	
+waist to hip ratio	
+waist-to-hip ratio	
+water	
+wc	
+weight	
+weight classification	
+white	
+whr	
+widowed	
+wine	
+working part time or full time	
+worse	
+wsr	
+zinc	

@@ -1,0 +1,22 @@
+	Hemodialysis	Peritoneal<br>Dialysis
+	(n = 104)	(n = 48)
+Energy (kcal/d)	1462 ± 61	1624 ± 152
+Protein (g/d)	53.2 ± 2.3	67.3 ± 5.7*
+Carbohydrate (g/d)	168.0 ± 7.7	183.7 ± 17.5
+Fat (g/d)	65.6 ± 3.0	70.7 ± 7.4
+Saturated fat (g/d)	22.2 ± 1.1	24.5 ± 2.5
+Monounsaturated fat (g/d)	24.6 ± 1.1	26.7 ± 2.9
+Polyunsaturated fat (g/d)	13.9 ± 0.8	14.0 ± 1.6
+Dietary fiber (g/d)	9.7 ± 0.5	10.4 ± 0.8
+Water-soluble fiber (g/d)	3.5 ± 0.2	3.8 ± 0.3
+Cholesterol (mg/d)	247 ± 15	308 ± 32t
+Calcium (mg/d)	436 ± 23	672 ± 73t
+Iron (mg/d)	9.3 ± 0.4	10.0 ± 0.9
+Selenium (jxg/d)	81 ± 4	95 ±8§
+Vitamin A, total (i±g RE/d)<br>Retinol (preformed vitamin	772 ± 37	816 ± 75
+A, p.g/d)	385 ± 26	415 ± 51
+(3-Carotene (pcg/d)	2322 ± 142	2405 ± 206
+a-Tocopherol (mg/d)	6.6 ± 0.3	6.6 ± 0.6
+Vitamin D (jig/d)	3.7 ± 0.2	5.4 ± 0.7*
+Vitamin C (mg/d)	66 ± 5	82 ± 7§
+Alcohol (g/d)	0.5 ± 0.2	0.4 ± 0.1
