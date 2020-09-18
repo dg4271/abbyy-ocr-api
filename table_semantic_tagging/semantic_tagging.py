@@ -359,6 +359,10 @@ class Semantic:
         headerType = self.storedDicAttribute.get(self.textCleaned.lower(), -1)
         if headerType != -1:
             self.attribute = "attribute"
+        
+        # 20200917 CJ요청 - 단위가 있으면 attribute로 해주세요.
+        if  self.unitRepres != "":
+            self.attribute = "attribute"
 
     def getResultDict(self):
         output = dict()

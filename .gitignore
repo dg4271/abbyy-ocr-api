@@ -4,3 +4,5 @@ log_flask/
 cj-poc-papers/
 uploads/
 ocr-output/
+.vscode
+

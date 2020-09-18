@@ -91,6 +91,25 @@ def ocr():
 
 #     return json.dumps(json_data, ensure_ascii=False, indent="\t")
 
+
+@app.route('/extractedPreKB/regularizedValueWithHeader', methods=['POST'])
+def get_regularized_value_with_header():
+    if request.method == 'POST':
+        if request.content_type != 'application/json':
+            pass
+        else:
+            print(request.data)
+            value = json.loads(request.data)
+            try:
+                result = preKB_mapper.get_regularized_value_with_header(value)
+                r = Response(response=json.dumps(result, indent=3), status=200, mimetype="application/json")
+                return r
+            except Exception as e:
+                print("Value regularizing failed")
+                print("Error: ", e)
+                return "Value regularizing failed"
+
+
 @app.route('/extractedPreKB/regularizedValue', methods=['POST'])
 def get_regularized_value():
     if request.method == 'POST':

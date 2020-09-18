@@ -9,14 +9,19 @@ from table_semantic_tagging.value_regularizer import *
 from xml_to_table.table_extractor import * 
 
 class GroupInfo:
-    def __init__(self, groupName="", timeline="", attribute="", mean="", std="", \
-        unit="", terms=""):
+    def __init__(self, groupName="", timeline="", attribute="", value_1="", unit_1="", 
+                 value_2="", unit_2="", std="", min="", max="", terms=""):
         self.groupName = groupName
         self.timeline = timeline
         self.attribute = attribute
-        self.mean = mean
+        #self.mean = mean
+        self.value_1 = value_1
+        self.unit_1 = unit_1
+        self.value_2 = value_2
+        self.unit_2 = unit_2
         self.std = std
-        self.unit = unit
+        self.min = min
+        self.max = max
         self.terms = terms
 
     def toJson(self):
@@ -142,19 +147,24 @@ def join_treatment_gene(treatmentInfos, geneInfos):
     elif len(treatmentInfos)==0 and len(geneInfos) != 0:
 
         for _geneInfo in geneInfos:
-            treatmentGeneInfo.append(TreatmentGeneInfo(_geneInfo.groupName, "", \
-                "", _geneInfo.gene, _geneInfo.snp, "", \
-                "",  "", "", "", \
-                "", _geneInfo.bm, _geneInfo.bmc))
+        
+            if (_geneInfo.gene or _geneInfo.snp) and _geneInfo.bm:
+                treatmentGeneInfo.append(TreatmentGeneInfo(_geneInfo.groupName, "", \
+                    "", _geneInfo.gene, _geneInfo.snp, "", \
+                    "",  "", "", "", \
+                    "", _geneInfo.bm, _geneInfo.bmc))
+            
 
         return treatmentGeneInfo
     elif len(treatmentInfos)!=0 and len(geneInfos) == 0:
 
         for _treatmentInfo in treatmentInfos:
-            treatmentGeneInfo.append(TreatmentGeneInfo(_treatmentInfo.groupName, _treatmentInfo.treatment, \
-                _treatmentInfo.treatmentType, "", "", _treatmentInfo.idu, \
-                _treatmentInfo.ido,  _treatmentInfo.pa, _treatmentInfo.dic, _treatmentInfo.di, \
-                _treatmentInfo.dc, _treatmentInfo.bm, _treatmentInfo.bmc))
+        
+            if _treatmentInfo.treatment and (_treatmentInfo.pa or _treatmentInfo.bm):
+                treatmentGeneInfo.append(TreatmentGeneInfo(_treatmentInfo.groupName, _treatmentInfo.treatment, \
+                    _treatmentInfo.treatmentType, "", "", _treatmentInfo.idu, \
+                    _treatmentInfo.ido,  _treatmentInfo.pa, _treatmentInfo.dic, _treatmentInfo.di, \
+                    _treatmentInfo.dc, _treatmentInfo.bm, _treatmentInfo.bmc))
         
         return treatmentGeneInfo
     else:
@@ -183,9 +193,29 @@ def join_treatment_gene(treatmentInfos, geneInfos):
         # print(df_merge_outer.head())
 
         for _, row in df_merge_outer.iterrows():
-            treatmentGeneInfo.append(TreatmentGeneInfo(row["groupName"], row["treatment"], \
-                row["treatmentType"], row["gene"], row["snp"], row["idu"], row["ido"], \
-                row["pa"], row["dic"], row["di"], row["dc"], row["bm"], row["bmc"]))
+
+            is_gene_or_snp = False
+            is_pa_or_bm = False
+            is_treat = False
+
+            if row["gene"] or row["snp"]:
+                is_gene_or_snp = True
+            
+            if row["pa"] or row["bm"]:
+                is_pa_or_bm = True
+            
+            if row["treatment"]:
+                is_treat = True
+
+            
+            if (is_gene_or_snp and is_pa_or_bm) or (is_gene_or_snp and is_treat) or (is_pa_or_bm and is_treat):
+                treatmentGeneInfo.append(TreatmentGeneInfo(row["groupName"], row["treatment"], \
+                                        row["treatmentType"], row["gene"], row["snp"], row["idu"], row["ido"], \
+                                        row["pa"], row["dic"], row["di"], row["dc"], row["bm"], row["bmc"]))
+            else:
+                print("Filterd row from text ")
+                print(row)
+                continue
 
         return treatmentGeneInfo
   
@@ -282,7 +312,7 @@ def from_unstructured(doc_id):
             unit = _groupInfo["unit"]
             terms = "|".join(_groupInfo["terms"])
 
-            groupInfo.append(GroupInfo(groupName, timeline, attribute, mean, std, unit, terms))
+            groupInfo.append(GroupInfo(groupName, timeline, attribute, mean, "", "", "", std, "", "", terms))
     except Exception as e:
         print("groupInfo parsing error")
         print(biobert_result["groupInfo"])
@@ -336,11 +366,9 @@ def from_unstructured(doc_id):
         print(treatmentInfo)
         print(geneInfo)
         print("Error: ", e)
-    # except Exception as ex:
-    #     print("error on doc id:", doc_id)
-    #     print(ex)
-    #     # biobert json dump.. 
-    #     #with open("")
+
+    
+
 
     data.append(Data("Text", groupInfo, treatmentGeneInfo, experimentInfo))
     
@@ -425,30 +453,56 @@ def from_structured(xml_path):
                     print("Error: ", e)
                     continue
 
-                mean = None
+                #mean = None
+                value_1 = None
+                unit_1 = None
+                value_2 = None
+                unit_2 = None
                 SD = None
+                range_min = None
+                range_max = None
                 terms = ""
                 is_p_value = False
-                p_value = None
+                p_value = None 
                 try:
-                    for regularzied_value in regularzied_values:
-                        
+                    # 한 cell의 value는 최대 2개까지 있는 것을 고려해 파싱
+                    for regularzied_value in regularzied_values: 
+                        #print(regularzied_value)
                         if regularzied_value['unit'] == 'p_value': 
                             is_p_value = True
                             p_value = PValue(regularzied_value['significant'], regularzied_value['value'], regularzied_value['originalCell'])
                             #print(p_value)
 
-                        elif regularzied_value['type'] == "mean" or regularzied_value['type'] == "default" or regularzied_value['type'] == "range":
-                            if type(regularzied_value['value']) is tuple:
-                                mean = regularzied_value['value'][0]
-                            else: 
-                                mean = regularzied_value['value'] 
+                        elif regularzied_value['type'] == "mean" or regularzied_value['type'] == "default" \
+                              or regularzied_value['type'] == "count" or regularzied_value['unit'] == "count":
+                            
+                            #print(value_1)
+                            if not value_1:
+                                value_1 = regularzied_value['value']
+                                unit_1 = regularzied_value['unit']
+                            elif regularzied_value['unit'] == "%":
+                                value_2 = regularzied_value['value']
+                                unit_2 = regularzied_value['unit']
+
+                        # elif regularzied_value['type'] == "mean" or regularzied_value['type'] == "default":
+                        #     if type(regularzied_value['value']) is tuple:
+                        #         mean = regularzied_value['value'][0]
+                        #     else: 
+                        #         mean = regularzied_value['value'] 
                             
                         elif regularzied_value['type'] == 'SD': 
                             if type(regularzied_value['value']) is tuple:
                                 SD = regularzied_value['value'][0]
                             else:
                                 SD = regularzied_value['value']
+                        
+                        elif regularzied_value['type'] == "range":
+                            if type(regularzied_value['value']) is tuple:
+                                range_min = regularzied_value['value'][0]
+                                range_max = regularzied_value['value'][1]
+                            else:
+                                range_min = regularzied_value['value']
+
                         
                         
                 except Exception as e:
@@ -479,35 +533,37 @@ def from_structured(xml_path):
                 #   - group header에만 unit이 있다면 사용
                 #   - unit list중 마지막 element 사용 (header list의 마지막이 value와 연관성 높다고 판단) 
                 """
-                unit = ""
+                #unit = ""
                 if len(attribute_header["unit"]) != 0:
-                    unit = attribute_header["unit"][-1]
+                    unit_1 = attribute_header["unit"][-1]
                 elif len(group_header["unit"]) != 0:
-                    unit = group_header["unit"][-1]
+                    unit_1 = group_header["unit"][-1]
 
                 if is_p_value and p_value:
                     row_p_values.append(p_value)
                 else: 
-                    row_groupInfos.append(GroupInfo(group_header["text"], group_header["timeLine"], attribute_header["text"], \
-                        mean, SD, unit, terms))
+                    row_groupInfos.append(GroupInfo(group_header["text"], group_header["timeLine"], 
+                                                attribute_header["text"], value_1, unit_1, 
+                                                value_2, unit_2, SD, range_min, range_max,
+                                                terms))
                     
             groupInfo.extend(row_groupInfos)  
 
             """
             6. experiemntInfo 추출
               - 같은 행의 groupInfo 들의 관계 규칙을 파악하여 추출
-              - <control group, expreimental group, p-value> 트리플 단위로 추출이 목표
+              - <control group, expreimental group, p-value> 트리플 단위로 추출이 목표 
   
             """ 
   
-            # Rule 1. groupInfo 2개, p-value 1개 트리플의 짝이 맞는 경우
+            # Rule 1. groupInfo 2개, p-value 1개 트리플의 짝이 맞는 경우 
             if len(row_p_values) != 0 and (len(row_groupInfos) == len(row_p_values) * 2): 
-                try:    
+                try:     
                     for i in range(len(row_p_values)):
                         control = row_groupInfos[2*i]
                         experiment = row_groupInfos[2*i+1] 
                         p_value = row_p_values[i]
-                        value_difference = experiment.mean - control.mean
+                        value_difference = experiment.value_1 - control.value_1
                         isDecrease = value_difference < 0
                         
                         experimentInfo.append(ExperimentInfo(control.groupName, control.timeline, experiment.groupName, experiment.timeline,
@@ -588,6 +644,10 @@ def get_semantic_tag(headerList):
 def get_regularized_value(value):
     return ValueRegularizer().regularize_value(value)
 
+
+def get_regularized_value_with_header(hv):
+    return ValueRegularizer().regularize_value_with_header(hv)
+
 def ke_bulk(xml_list, OUT_DIR_PATH):
     failed_xml_list = []
 
@@ -623,10 +683,10 @@ if __name__ == "__main__":
     """
     0. 지식 추출 (벌크)
     """
-    # BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_xml_30/"
-    # OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_table_result_30/"
-    BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_138/"
-    OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_138/"
+    BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_xml_30/"
+    OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_table_result_30/"
+    # BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_138/"
+    # OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_138/"
     # BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_cj_78/"
     # OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_78/"
     
