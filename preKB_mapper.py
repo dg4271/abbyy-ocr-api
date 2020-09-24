@@ -14,7 +14,6 @@ class GroupInfo:
         self.groupName = groupName
         self.timeline = timeline
         self.attribute = attribute
-        #self.mean = mean
         self.value_1 = value_1
         self.unit_1 = unit_1
         self.value_2 = value_2
@@ -31,7 +30,6 @@ class PValue:
     def __init__(self, isSignificant="", value="", originalCell=""):
         self.isSignificant = isSignificant
         self.value = value
-        self.originalCell = originalCell
 
 
 class GeneInfo:
@@ -125,7 +123,7 @@ class PreKB:
         return json.dumps(self, default=lambda o: o.__dict__, indent=3)
 
 
-def join_treatment_gene(treatmentInfos, geneInfos):
+def join_treatment_gene(treatmentInfos, geneInfos): 
     
     """
     비정형의 output인 treatmentInfo와 geneInfo를 join하여 treatmentGeneInfo 생성
@@ -137,8 +135,8 @@ def join_treatment_gene(treatmentInfos, geneInfos):
     4. treatmentInfos와 geneInfos의 길이가 모두 0이 아닌 경우 => outer join
     """
 
-    print(len(treatmentInfos))
-    print(len(geneInfos))
+    #print(len(treatmentInfos))
+    #print(len(geneInfos))
 
     treatmentGeneInfo = []
 
@@ -147,8 +145,25 @@ def join_treatment_gene(treatmentInfos, geneInfos):
     elif len(treatmentInfos)==0 and len(geneInfos) != 0:
 
         for _geneInfo in geneInfos:
-        
-            if (_geneInfo.gene or _geneInfo.snp) and _geneInfo.bm:
+            is_gene_or_snp = False
+            is_pa_or_bm = False
+            is_group = False
+
+            # group 1
+            if _geneInfo.gene or _geneInfo.snp:
+                is_gene_or_snp = True
+            
+            # group 2
+            if _geneInfo.bm:
+                is_pa_or_bm = True
+
+            # group 4
+            if _geneInfo.groupName:
+                is_group = True
+
+            should_include = (is_gene_or_snp and is_pa_or_bm) or (is_gene_or_snp and is_group) or (is_pa_or_bm and is_group)
+
+            if should_include:
                 treatmentGeneInfo.append(TreatmentGeneInfo(_geneInfo.groupName, "", \
                     "", _geneInfo.gene, _geneInfo.snp, "", \
                     "",  "", "", "", \
@@ -159,8 +174,25 @@ def join_treatment_gene(treatmentInfos, geneInfos):
     elif len(treatmentInfos)!=0 and len(geneInfos) == 0:
 
         for _treatmentInfo in treatmentInfos:
-        
-            if _treatmentInfo.treatment and (_treatmentInfo.pa or _treatmentInfo.bm):
+            is_pa_or_bm = False
+            is_treat = False
+            is_group = False
+
+            # group 2
+            if _treatmentInfo.pa or _treatmentInfo.bm:
+                is_pa_or_bm = True
+            
+            # group 3
+            if _treatmentInfo.treatment:
+                is_treat = True
+
+            # group 4
+            if _treatmentInfo.groupName:
+                is_group = True
+
+            should_include = (is_pa_or_bm and is_treat) or (is_pa_or_bm and is_group) or (is_treat and is_group)
+
+            if should_include:
                 treatmentGeneInfo.append(TreatmentGeneInfo(_treatmentInfo.groupName, _treatmentInfo.treatment, \
                     _treatmentInfo.treatmentType, "", "", _treatmentInfo.idu, \
                     _treatmentInfo.ido,  _treatmentInfo.pa, _treatmentInfo.dic, _treatmentInfo.di, \
@@ -197,24 +229,34 @@ def join_treatment_gene(treatmentInfos, geneInfos):
             is_gene_or_snp = False
             is_pa_or_bm = False
             is_treat = False
+            is_group = False
 
+            # group 1
             if row["gene"] or row["snp"]:
                 is_gene_or_snp = True
             
+            # group 2
             if row["pa"] or row["bm"]:
                 is_pa_or_bm = True
             
+            # group 3
             if row["treatment"]:
                 is_treat = True
 
-            
-            if (is_gene_or_snp and is_pa_or_bm) or (is_gene_or_snp and is_treat) or (is_pa_or_bm and is_treat):
+            # group 4
+            if row["groupName"]:
+                is_group = True
+
+            should_include = (is_gene_or_snp and is_pa_or_bm) or (is_gene_or_snp and is_treat) or (is_pa_or_bm and is_treat) \
+                                or (is_gene_or_snp and is_group) or (is_pa_or_bm and is_group) or (is_treat and is_group)
+
+            if should_include:
                 treatmentGeneInfo.append(TreatmentGeneInfo(row["groupName"], row["treatment"], \
                                         row["treatmentType"], row["gene"], row["snp"], row["idu"], row["ido"], \
                                         row["pa"], row["dic"], row["di"], row["dc"], row["bm"], row["bmc"]))
             else:
                 print("Filterd row from text ")
-                print(row)
+                #print(row)
                 continue
 
         return treatmentGeneInfo
@@ -242,26 +284,41 @@ def req_methods(json_data):
     except:
         return None
 
+def get_biobert_result(doc_id):
+    """
+    INPUT: doc_id
+    OUTPUT: biobert result (geneInfo, treatmentInfo ...)
+    
+    입력 doc_id에 대한 biobert 결과가 cache에 존재하면 이를 사용.
+    """
+    biobert_result  = None 
+
+    CACHE_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/biobert_info_cache/"
+    if doc_id+".json" in os.listdir(CACHE_PATH):
+        with open(CACHE_PATH+doc_id+".json") as json_file:
+            biobert_result = json.load(json_file)
+        print("biobert cache hit")
+    else:    
+        sents_json = req_sents(doc_id)
+        if sents_json is None:
+            print("result of sents is None ", doc_id)
+            return None
+        
+        biobert_result = req_methods(sents_json)
+        if biobert_result is None:
+            print("result of biobert is None ", doc_id)
+            return None
+        
+        with open(CACHE_PATH+doc_id+".json", 'w') as json_file:
+            json.dump(biobert_result, json_file, indent=4)    
+    return biobert_result
+
 def from_unstructured(doc_id):
 
     data = []
-    
-    sents_json = req_sents(doc_id)
-    if sents_json is None:
-        print("result of sents is None ", doc_id)
+    biobert_result = get_biobert_result(doc_id)
+    if not biobert_result:
         return data
-    
-    #print(sents_json)
-
-    biobert_result = req_methods(sents_json)
-    if biobert_result is None:
-        print("result of biobert is None ", doc_id)
-        return data
-
-    
-    BASE_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_biobert_result/"
-    with open(BASE_PATH+"biobert_"+doc_id+".json", 'w') as json_file:
-        json.dump(biobert_result, json_file, indent=4)
 
     groupInfo = []
     geneInfo = []
@@ -269,7 +326,6 @@ def from_unstructured(doc_id):
     treatmentGeneInfo = []
     experimentInfo = []
 
-    # try: 
     # geneInfo
     try:
         for _geneInfo in biobert_result["geneInfo"]:
@@ -299,11 +355,9 @@ def from_unstructured(doc_id):
         print(biobert_result["geneInfo"])  
         print("Error: ", e)                  
         
-
     # groupInfo
     try:
         for _groupInfo in biobert_result["groupInfo"]:
-
             groupName = _groupInfo["groupName"]
             timeline = _groupInfo["timeLine"]
             attribute = _groupInfo["attribute"]
@@ -317,7 +371,6 @@ def from_unstructured(doc_id):
         print("groupInfo parsing error")
         print(biobert_result["groupInfo"])
         print("Error: ", e)
-
 
     # treatementInfo
     try:
@@ -367,11 +420,8 @@ def from_unstructured(doc_id):
         print(geneInfo)
         print("Error: ", e)
 
-    
-
 
     data.append(Data("Text", groupInfo, treatmentGeneInfo, experimentInfo))
-    
     return data
 
 def from_structured(xml_path): 
@@ -413,7 +463,7 @@ def from_structured(xml_path):
         # cell: <row header, col header, value> 단위로 groupInfo 추출
         # row: [ <row header, col header, value> ] 단위로 experimentInfo 추출 
         groupInfo = [] 
-        experimentInfo = []
+        experimentInfo = [] 
         
         for rows in extractedTable["hv"]:
             
@@ -463,21 +513,21 @@ def from_structured(xml_path):
                 range_max = None
                 terms = ""
                 is_p_value = False
-                p_value = None 
+                p_value = None   
                 try:
                     # 한 cell의 value는 최대 2개까지 있는 것을 고려해 파싱
                     for regularzied_value in regularzied_values: 
                         #print(regularzied_value)
                         if regularzied_value['unit'] == 'p_value': 
                             is_p_value = True
-                            p_value = PValue(regularzied_value['significant'], regularzied_value['value'], regularzied_value['originalCell'])
+                            p_value = PValue(regularzied_value['significant'], regularzied_value['value'])
                             #print(p_value)
 
                         elif regularzied_value['type'] == "mean" or regularzied_value['type'] == "default" \
                               or regularzied_value['type'] == "count" or regularzied_value['unit'] == "count":
                             
                             #print(value_1)
-                            if not value_1:
+                            if not value_1: 
                                 value_1 = regularzied_value['value']
                                 unit_1 = regularzied_value['unit']
                             elif regularzied_value['unit'] == "%":
@@ -528,7 +578,7 @@ def from_structured(xml_path):
                     continue
 
                 """
-                # 5. unit 판단
+                # 5. unit 판단 
                 #   - attribute header의 unit을 먼저 확인
                 #   - group header에만 unit이 있다면 사용
                 #   - unit list중 마지막 element 사용 (header list의 마지막이 value와 연관성 높다고 판단) 
@@ -541,7 +591,7 @@ def from_structured(xml_path):
 
                 if is_p_value and p_value:
                     row_p_values.append(p_value)
-                else: 
+                elif not is_p_value: 
                     row_groupInfos.append(GroupInfo(group_header["text"], group_header["timeLine"], 
                                                 attribute_header["text"], value_1, unit_1, 
                                                 value_2, unit_2, SD, range_min, range_max,
@@ -648,7 +698,9 @@ def get_regularized_value(value):
 def get_regularized_value_with_header(hv):
     return ValueRegularizer().regularize_value_with_header(hv)
 
-def ke_bulk(xml_list, OUT_DIR_PATH):
+def ke_bulk(BASE_DIR_PATH, OUT_DIR_PATH):
+
+    xml_list = os.listdir(BASE_DIR_PATH)
     failed_xml_list = []
 
     for xml_file in xml_list:
@@ -658,19 +710,23 @@ def ke_bulk(xml_list, OUT_DIR_PATH):
             print("Doc ID", doc_id)
             result = extract_preKB(BASE_DIR_PATH+xml_file, doc_id).toJson()
 
+            file_name = "preKB_" + xml_file.split(".")[0]
+            if len(file_name) > 100:
+                file_name = file_name[:100]
+
             # write json
-            with open(OUT_DIR_PATH + "preKB_" + xml_file.split(".")[0] + ".json", 'w') as outFile:
+            with open(OUT_DIR_PATH + file_name + ".json", 'w') as outFile:
                 outFile.write(result)
             
             # write excel
-            preKB_to_xlsx(result, OUT_DIR_PATH+"preKB_"+xml_file.split(".")[0]+'.xlsx')
+            preKB_to_xlsx(result, OUT_DIR_PATH + file_name + '.xlsx')
         except:
             failed_xml_list.append(xml_file)
 
     if failed_xml_list:
         with open(OUT_DIR_PATH + "failed_xml_list.txt", 'w') as outFile:
-                for xml in failed_xml_list:
-                    outFile.write(xml+"\n")
+            for xml in failed_xml_list:
+                outFile.write(xml+"\n")
 
 
 if __name__ == "__main__":
@@ -683,23 +739,25 @@ if __name__ == "__main__":
     """
     0. 지식 추출 (벌크)
     """
-    BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_xml_30/"
-    OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_table_result_30/"
-    # BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_138/"
-    # OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_138/"
-    # BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_cj_78/"
-    # OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_78/"
+    # BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_xml_30/"
+    # OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_table_result_30/"
+    BASE_DIR_PATH_138 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_138/"
+    OUT_DIR_PATH_138 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_138/"
+    BASE_DIR_PATH_78 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_cj_78/"
+    OUT_DIR_PATH_78 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_78/"
     
-    # Base directory
-    xml_list = os.listdir(BASE_DIR_PATH)
-
-    # Failed list
+        # Failed list
     # xml_list = []
     # with open(OUT_DIR_PATH + "failed_xml_list.txt") as failed_file:
     #     for line in failed_file:
     #         xml_list.append(line.rstrip())
 
-    ke_bulk(xml_list, OUT_DIR_PATH)
+    # ke_bulk(BASE_DIR_PATH_138, OUT_DIR_PATH_138)
+
+    ke_bulk(BASE_DIR_PATH_78, OUT_DIR_PATH_78)
+    
+
+
 
 
     """
