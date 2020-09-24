@@ -135,7 +135,7 @@ def semantic_tagging():
             pass
         else:
             print(request.data)
-            headerList = json.loads(request.data)['input']
+            headerList = json.loads(request.data)
             try:
                 result = preKB_mapper.get_semantic_tag(headerList)
                 r = Response(response=json.dumps(result, indent=3), status=200, mimetype="application/json")
