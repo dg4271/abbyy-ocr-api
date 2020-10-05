@@ -133,7 +133,7 @@ class Semantic:
 
 
     def splitHeaderUnit(self):
-        cell = self.poped_populationNumber.strip()
+        cell = self.poped_populationNumber.strip(" .,")
         textPart = cell
         unitPart = ""
 
@@ -158,6 +158,26 @@ class Semantic:
             self.textPart = cell[:-1]
             return
 
+        
+        # 전체가 괄호로 쌓여서 오는 경우 괄호를 지운다.
+        # 이후 띄어쓰기로 합치므로 구분은 됨
+
+
+        # 띄어쓰기하고 유닛을 표기하는 경우
+        # 띄어쓰기하고 오른쪽 마지막 텍스트가 유닛으면 분리한다.
+        # 아레 단위를 유닛에서 제거함
+        # weeks	w,week,wk
+        # months	m,month
+        if len(textPart.split(" ")) > 1:
+            if re.match(r"^(([yY](ea)?r?)|([mM](onth)?)|([wW](ee)?k?))s?$", textPart.split(" ")[-1].strip()) == None:
+                representativeUnit = self.storedDicUnit.get(textPart.split(" ")[-1], -1)
+                if representativeUnit != -1:
+                    self.unitPart = representativeUnit
+                    self.textPart = ' '.join(textPart.split(" ")[:-1])
+                    if self.textPart.strip()[-1] == "," or self.textPart.strip()[-1] == ".":
+                        self.textPart = self.textPart.strip()[:-1]  
+                    return        
+        
         ## 시작 매칭
         # % 로 시작할 경우(% frequency) %를 단위로 나머진 텍스트
         # 그래도 혹시 모르니 괄호나 쉼표가 없으면 return
@@ -176,17 +196,60 @@ class Semantic:
             self.textPart = cell[11:]
             return
         # No. of로 시작할 경우(No.of lesions) n을 단위로 나머지는 텍스트
-        if re.match("[Nn]o. [oO]f", cell) != None:
+        if re.match("[Nn]umber [oO]f", cell) != None:
+            self.unitPart = "n"
+            self.unitPartList.append( self.unitPart)
+            self.textPart = cell[10:]
+            return
+        if re.match("[Nn]o\. [oO]f", cell) != None:
             self.unitPart = "n"
             self.unitPartList.append( self.unitPart)
             self.textPart = cell[7:]
             return
+        if re.match("[Nn]o\.", cell) != None:
+            self.unitPart = "n"
+            self.unitPartList.append( self.unitPart)
+            self.textPart = cell[3:]
+            return
 
+        ## 중간 매칭
+        # n (%)
+        if re.search(r"[nN],? *\(%\)",cell) != None:
+            self.unitPart = "n (%)"
+            self.unitPartList.append("n")
+            self.unitPartList.append("%")
+            self.textPart = cell.replace("n (%)","").strip()
+            return
+        
+        # 중간에 %를 포함 한 유형
+        if cell.find("%") != -1:
+            self.unitPart = "%"
+            self.unitPartList.append( self.unitPart)
+            # 이경우엔 %를 붙여서 내보냄
+            self.textPart = cell
+            return
+        
+        # 중간 괄호 찾기 영역
+        cell_blank_group = re.search(r"\(([^()]+)\)",textPart)
+        if cell_blank_group != None:            
+            representativeUnit = self.storedDicUnit.get(cell_blank_group.groups()[0], -1)
+            if representativeUnit != -1:
+                self.unitPart = representativeUnit
+                self.textPart = textPart
+                return                    
+
+        if len(textPart.split(" ")) > 1:
+            representativeUnit = self.storedDicUnit.get(textPart.split(" ")[-1], -1)
+            if representativeUnit != -1:
+                self.unitPart = representativeUnit
+                self.textPart = ' '.join(textPart.split(" ")[:-1]) 
+                return        
+        
         ## 분리 영역
         # 1차 분리기준 괄호의 유무
         if cell.find(")") != -1:
             # 2차 분리 기준 문자(단위)로 끝나지 않고 문자(보충설명)문자로 끝나는 경우제외 
-            if ( cell.find(")") >= (len(cell) - 3) ):
+            if ( cell.find(")") >= (len(cell) - 1) ):
                 textPart = cell[:cell.find("(")]
                 unitPart = cell[cell.find("("):cell.find(")")+1]                
 
@@ -207,32 +270,44 @@ class Semantic:
 
     def checkTimeLine(self):
         # 타임라인 표현식
-        timeLine_match_exp = r"[mM]in[ute]?|[hH]our|[mM]onth|[yY]ear[sS]?|[yY]rs?|[wW]eek"
-        timeLine_saerch_exp = r"[0-9]+ ?(([mM]in[ute]?)|([hH]our)|([mM]onth)|([yY]ear[sS]?)|([Yy]rs?)|([wW]eek))"
-        if re.match( timeLine_match_exp, self.textPart) != None:
-            self.timeLine = self.textPart
-        if re.search( timeLine_saerch_exp, self.textPart) != None:
-            self.timeLine = self.textPart
+        timeLine_match_exp = r"^([1-9]* ?([mM]in[ute]?s?|[hH]ours?|[mM]onth[s]?|[yY]ear[sS]?|[yY]rs?|[wW]eeks?) ?[1-9]*)$"
+        timeLine_search_exp = r"([0-9]* ?[<>]* ?([aA]t)? ?[0-9]+ ?(([mM]in[ute]?s?)|([hH]ours?)|([mM]onth[s]?)|([yY]ear[sS]?)|([Yy]rs?)|([wW]eeks?)))"
+        
+        timeLine_match = re.match(timeLine_match_exp, self.textPart)
+        timeLine_search = re.search(timeLine_search_exp, self.textPart)   
+
+        if timeLine_match != None:
+            timeLine_match_grouped = timeLine_match.groups()
+            self.timeLine = timeLine_match_grouped[0].strip()
+            self.textPart = self.textPart.replace( timeLine_match_grouped[0], "" )
+
+        if timeLine_search != None:
+            timeLine_search_grouped = timeLine_search.groups()
+            self.timeLine = timeLine_search_grouped[0].strip()
+            self.textPart = self.textPart.replace( timeLine_search_grouped[0], "" )
+        
         return
 
     def cleanHeader(self):
         # 전처리 영역
         # 양옆 공백제거
-        textPart = self.textPart.strip()
+        textPart = self.textPart.strip("., ")
+
+        # 캡션 제거
 
         # 텍스트로 흘러들어간 단위 복귀
-        if self.storedDicUnit.get(textPart.lower(), -1 ) != -1:
+        if self.textPart == "N" or self.textPart == "n":
             self.unitRepresList.append(textPart)
             self.textPart = ""
             textPart = ""
-
+        
         # 텍스트가 없을 경우 조기종료
         if textPart == "":
             self.textCleaned = textPart
             return
 
         # 저장 영역
-        self.textCleaned = textPart.strip()
+        self.textCleaned = textPart.strip("., ")
         return self.textCleaned
     
     def getRepresentativetHeader(self):
@@ -272,7 +347,20 @@ class Semantic:
         if unitPart == "":
             self.unitCleaned = unitPart
             return self.unitCleaned
-        
+
+        # n (%) 사용자 정의
+        if unitPart == "n (%)":
+            self.unitCleaned = unitPart
+            self.unitRepresList.extend(["n","%"])
+            return self.unitCleaned
+
+        # degree 단위 먼저 확인
+        if unitPart.find("°C") != -1:
+            self.unitCleaned = "°C"
+            unitPocket.append(unitPart)   
+            self.unitRepresList.extend(unitPocket)
+            return self.unitCleaned
+
         # 제일먼저 양끝 괄호()부터 제거
         if unitPart.find("(") == 0:
             if unitPart.find(")") == len(unitPart)-1:
@@ -344,7 +432,13 @@ class Semantic:
             # 단위가 있으면 헤더에 유의미
             self.headerSign = 1
             return self.unitRepres
-            
+        
+        if self.unitRepres == "":
+            if self.textRepres == "":
+                self.textCleaned = self.textCleaned +", "+ self.unitCleaned
+            else:
+                self.textRepres = self.textRepres +", "+ self.unitCleaned
+
         return self.unitRepres
     
     def getHeaderValueType(self):
@@ -361,8 +455,9 @@ class Semantic:
             self.attribute = "attribute"
         
         # 20200917 CJ요청 - 단위가 있으면 attribute로 해주세요.
-        if  self.unitRepres != "":
-            self.attribute = "attribute"
+        # 20200929 컬럼 로우 스위칭 문제 때문에 제거.
+        # if  self.unitRepres != "":
+        #     self.attribute = "attribute"
 
     def getResultDict(self):
         output = dict()
@@ -413,7 +508,9 @@ class Semantic:
 
         for taggedHeader in taggedHeaders:
             # text
-            if taggedHeader["textRepres"] !="":
+            if isTableCaption( taggedHeader["originalCell"] ):
+                textQue = ""
+            elif taggedHeader["textRepres"] !="":
                 textQue = taggedHeader["textRepres"]
             elif taggedHeader["textCleaned"] != "":
                 textQue = taggedHeader["textCleaned"]
@@ -429,7 +526,8 @@ class Semantic:
                 self.fixedText = self.fixedText + " " + textQue
             else:
                 self.fixedtimLine = taggedHeader["timeLine"]
-            self.fixedText = self.fixedText.strip().replace("  "," ")
+                self.fixedText = self.fixedText + " " + textQue
+            self.fixedText = self.fixedText.strip(" .,").replace("  "," ")
             
             # type 1단계 타입 모으기
             typeStack.append(taggedHeader["type"])
@@ -482,6 +580,14 @@ class Semantic:
 
         return self.getResultDict2()
 
+
+def isTableCaption( text ):
+    import re
+    if re.match(r"[tT]able|[dD]stribution", text) != None:
+        return True
+    if len(text) > 100:
+        return True
+    return False
 
 if __name__ == "__main__":
     '''
@@ -551,9 +657,12 @@ if __name__ == "__main__":
     # print("-"*50)
     # print(json.dumps(output, indent=3))
     # print("-"*50)
-    print("-"*50)
+
     output = st_module.tagged_list_header([
-                                           "25(OH)D (ng/mL)"
+                         "Model 1",
+                                "OR (95% CI)",
+                                ". . . . . P",
+                                "J • ■ • : 1.04(0.99-1.09)"
                     ])
     # 출력
     print("-"*50)

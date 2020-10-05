@@ -2,10 +2,10 @@ FTO	FTO gene,Fat mass and obesity-associated (FTO) gene,FTO polymorphisms,Obesit
 Polymorphism	Single-nucleotide polymorphism,SNP,Gene polymorphism,Genetic polymorphism
 Nutrigenomics	Systems nutrigenomics,genetics
 MC4R	MC4R gene,MRC4 neurons
-Personalized	Personalied medicine,Personalized nutrition					
+Personalized	Personalied medicine,Personalized nutrition
 rs9939609	Polimorfismo rs9939609
-Obesity	Pediatrics obesity,Obesity/dyslipidemia,Monogenic obesity,Obese adolescents			
-Insulin resistance,Insulin,Insulin resistance index
+Obesity	Pediatrics obesity,Obesity/dyslipidemia,Monogenic obesity,Obese adolescents
+Insulin resistance	Insulin resistance index
 Type diabetes
 Hepatic steatosis
 Depression
@@ -17,7 +17,7 @@ control group	control,placebo group,placebo,CON
 intervention group	intervention,intervene
 weight	kg,weight mass,body weight,body mass
 height	cm,m,heights
-waist circumference	wc,waist C,Waist size
+waist circumference	WC,wc,waist C,Waist size
 hip circumference	hc,hip C
 waist hip ratio	waist-hip ration,WHR,Waist-to-Hip Ratio,WtHR
 supplementation	dietary supplement,oral administration,intervention,dietary intervention
@@ -26,14 +26,13 @@ Carbohydrate	carbohydrate,dietary carbohydrate
 Protein	Protein,dietary protein
 Fat	fat,dietary fat
 fiber	dietary fiber,dietary fibre
-MUFA	monounsaturated fatty acid
-PUFA	polyunsaturated fatty acid
-SFA	saturated fatty acid
+monounsaturated fatty acid	MUFA
+polyunsaturated fatty acid	PUFA
+saturated fatty acid	SFA
 Vitamin	Vit
 Mineral
-PA	physical activity
-fat mass	Trunk fat,TBFat,body fat mass
-BMI	body mass index
+physical activity	PA
+Fat Mass	Trunk fat,TBFat,body fat mass
 Fat Free Mass	Fat-Free Mass,TBLean,lean mass
 Nonviceral fat
 Viceral fat
@@ -78,24 +77,24 @@ Back pain intensity score
 FAS	fatty acid synthesis
 PAP	phoshohydrolase
 TNF-a
-IL-6	interleukin-6
-CCL2	chemokine(C-C motif) ligand 2
+interleukin-6	IL-6
+chemokine ligand 2	CCL2,C-C motif
 GLUT-4
 NF-κB
 LPS
 sICAM-1
 IgG
-IL-8	interleukin-8
+interleukin-8	IL-8
 Apolipoprotein B
 LDL-C/Apolipoprotein B ratio
 PPARγ
 ChREBP
-SCD1	stearoyl-CoA-desaturase
-CPT	carnitine palmitoyl transferase
-ACAT	acyl-CoA cholesterol esterification
-ADMA	asymmetric dimethylarginine
-SE	Selectin E,selectic E
-RBP4	retinol binding protein 4
+stearoyl-CoA-desaturase	SCD1
+carnitine palmitoyl transferase	CPT
+acyl-CoA cholesterol esterification	ACAT
+asymmetric dimethylarginine	ADMA
+Selectin E,selectic E
+retinol binding protein 4	RBP4
 DNA damage
 PPAR-α(mRNA)
 MC4R(mRNA)
@@ -107,7 +106,7 @@ Fat oxidation
 Blood glucose
 age	Age
 sex	Sex
-male	Male,Man,boy
-female	Female,women,woman,girl,Girl
-BMI	body mass index,Body Mass Index,bmi
+Male	Males,Man,boy,male,males
+Female	Females,women,woman,girl,Girl,females,female
+BMI	body mass index,Body Mass Index,bmi,Body mass index,Body Mass index
 cholesterol	ch,ch.,chol

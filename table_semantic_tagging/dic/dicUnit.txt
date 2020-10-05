@@ -33,7 +33,7 @@ U/mL	U/mL
 µg/mL	µg/mL
 s	s
 µkat/L	µkat/L
-mg/g creat	mg/g creat
+mg/g mg/g creat	mg/g creat
 kU/L	kU/L
 µmol/d	µmol/d
 units/L	units/L
@@ -148,10 +148,7 @@ mL
 g
 mg
 kg	kilograms,kilogram
-kg/m2	kg/m²
-years	y,year,yr
-weeks	w,week,wk
-months	m,month
+kg/m2	kg/m²,kg/m2
 n	N
 mm
 cm
@@ -267,3 +264,20 @@ IU	International Unit
 U	units,Units
 MET	Metabolic Equivalent of Task
 EU	endotoxin unit
+kg/m
+% of DM
+IU/kg
+mM
+IQR
+Mcal/kg
+lU/kg
+g per day
+LogMar
+log
+kJ
+°C
+Z-score	z-score
+mg/kg
+g/cm2
+g
+years	y,year,yr,yrs.

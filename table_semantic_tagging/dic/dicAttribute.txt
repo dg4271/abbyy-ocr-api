@@ -4,7 +4,6 @@
 5 mthf plasma
 5-mthf erythrocytes
 5-mthf plasma
-a
 aca
 active
 activites
@@ -58,12 +57,9 @@ behavioral problems
 biological parent
 black
 blood glucose
-bmi
-bmi-sds
 bodily pain
 body fat
 body fat percentage
-body mass index
 body weight
 bolidy pain
 bread
@@ -165,9 +161,6 @@ fat free mass
 fat mass
 fatty acids
 fe
-female
-female gender
-females
 ffm
 fiber
 fibre
@@ -199,7 +192,6 @@ global general behavior
 global general health
 glucose
 glucose 129
-gm
 gnb3
 gps
 graduate degree
@@ -296,7 +288,6 @@ learning problems
 legumes
 leptin
 leucine
-lf
 lf/hf
 lgt/diabetes
 lipids
@@ -307,22 +298,15 @@ ltc4s
 lucerne
 lysine
 magnesium
-male
-male female
-male:female
-males
 mangranese
 marital status
 married
 mc4r
 mca
-mcs
 mda
-mean
 meat
 meat products
 mental health
-methionine
 mg
 middle
 minerals
@@ -366,17 +350,14 @@ not prudent diet
 not reported
 not working
 nppa
-number
 nuts
 obese
 olive oil
 one
-organic
 orthopedic/bone/joint problems
 osteoarthritis
 osteoporosis
 overall activity
-overweight
 pai1
 parental impact time
 parental impact-emotional
@@ -399,8 +380,6 @@ pd duration
 person year
 person years
 person-years
-phalaris
-phalaris+lupin
 phenylalanine
 phosphorus
 physical functioning
@@ -416,7 +395,6 @@ pon1 activity
 postgroduate degree
 potassium
 pp distress
-pparg
 praental impact emotional
 pramipexole
 prealbumin
@@ -462,7 +440,6 @@ scc
 scnn1a
 scya11
 sdf1
-se
 secondary school
 secondary/high school
 sedentary
@@ -502,7 +479,6 @@ soup/stew
 speech problems
 stature
 stew
-stress
 stroke
 sucrose
 sucrose taste threshold
@@ -535,7 +511,6 @@ treatment
 treatment other than rp
 triacylglycerides
 triglycerides
-tt
 two
 ugb
 ulcers
