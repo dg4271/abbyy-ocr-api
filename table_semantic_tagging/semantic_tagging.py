@@ -192,12 +192,12 @@ class Semantic:
             self.unitPartList.append( self.unitPart)
             self.textPart = cell[10:]
             return
-        if re.match("[Nn]o\. [oO]f", cell) != None:
+        if re.match("[Nn]o[.] [oO]f", cell) != None:
             self.unitPart = "n"
             self.unitPartList.append( self.unitPart)
             self.textPart = cell[7:]
             return
-        if re.match("[Nn]o\.", cell) != None:
+        if re.match("[Nn]o[.]", cell) != None:
             self.unitPart = "n"
             self.unitPartList.append( self.unitPart)
             self.textPart = cell[3:]
