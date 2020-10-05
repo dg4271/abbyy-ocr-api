@@ -64,7 +64,7 @@ class Semantic:
         self.fixedPopulationNumber = list()
 
 
-    # 사전관리 영역
+    ## 사전관리 영역
     def importDicAsDic(self, path):
         try:
             dic = dict()
@@ -103,20 +103,15 @@ class Semantic:
         path = os.path.dirname(os.path.abspath(__file__)) + "/dic/" + "dicAttribute.txt"
         self.storedDicAttribute = self.importDicAsDic(path)
 
-    # 작업영역
+    ## 작업영역
     # 입력값 저장
     def setOriginalCell(self, text):
         self.originalCell =  text
-        # 딕셔너리로 인풋을 받고자 하는 경우 사용 
-        # input = json.loads(jsonString)
-        # self.originalCell = input.get("originalCell")
-
-        # 대표값이 있음을 아직 모른다.
         self.setHeaderSign(0)
         return self.originalCell
 
     def setHeaderSign(self, digit):
-        # 유의미 0 무의미 1
+        # 무의미 0 유의미 1
         self.headerSign = digit
 
     def takePopulationNumber(self):
@@ -128,6 +123,7 @@ class Semantic:
         if (population_group != None ):
             self.poped_populationNumber = cell.replace(population_group.groups()[0], "")
             self.populationNumber = int(re.sub(r"[ ,.]","",population_group.groups()[1]))
+
         else:
             self.poped_populationNumber = self.originalCell
 
@@ -158,14 +154,9 @@ class Semantic:
             self.textPart = cell[:-1]
             return
 
-        
-        # 전체가 괄호로 쌓여서 오는 경우 괄호를 지운다.
-        # 이후 띄어쓰기로 합치므로 구분은 됨
-
-
         # 띄어쓰기하고 유닛을 표기하는 경우
         # 띄어쓰기하고 오른쪽 마지막 텍스트가 유닛으면 분리한다.
-        # 아레 단위를 유닛에서 제거함
+        # 아랫 단위를 유닛에서 제거하였다.
         # weeks	w,week,wk
         # months	m,month
         if len(textPart.split(" ")) > 1:
@@ -225,7 +216,6 @@ class Semantic:
         if cell.find("%") != -1:
             self.unitPart = "%"
             self.unitPartList.append( self.unitPart)
-            # 이경우엔 %를 붙여서 내보냄
             self.textPart = cell
             return
         
@@ -374,7 +364,7 @@ class Semantic:
             # "," 자체일 경우 공백으로둔다.
             if unitPart == ",":
                 unitPart = ""
-            # "," 저체가 아니면, 가장 앞에 있는 유닛 추출, 그리고 양옆 공백제거   
+            # "," 자체가 아니면, 가장 앞에 있는 유닛 추출, 그리고 양옆 공백제거   
             else:    
                 unitPart = unitPart.split(",")[0].strip()
                 # 뒤에 놈들도 살려내
@@ -398,7 +388,7 @@ class Semantic:
         if re.search(r"[0-9a-zA-Z%]",unitPart ) != None:
             unitPart = unitPart[re.search(r"[0-9a-zA-Z%]",unitPart ).span()[0] : ]
 
-        # 사전에 명시된 OCR 관련 변환 ex) m2 
+        # OCR문제 ex) m2 
         unitPart = unitPart.replace("m2 ","m² ").replace("m3 ","m³ ").replace("/24h","/24 h")
 
         unitPocket.append(unitPart)        
@@ -568,11 +558,10 @@ class Semantic:
         return output
 
     def tagged_list_header(self, header_list):
-        # 동균주임님 요청 아웃풋
+    
         if header_list == []:
             return dict()
-        ###
-        
+
         self.resetParams()
         self.setOriginalList( header_list )
         self.tagEachHeader()
@@ -590,32 +579,13 @@ def isTableCaption( text ):
     return False
 
 if __name__ == "__main__":
-    '''
-    - 입력 셀에 대하여 태깅이 에러 없이 이루어지는 지 확인 
-    - Input: 헤더 String
-    - Ouput: 헤더 태깅 Dictionary
-     - 예시: 
-        인풋: 
-        Blood glucose(mg/dL), n = 20 
-        아웃풋 : 
-        {
-        "originalCell": "Blood glucose(mg/dL), n = 20 ",
-        "textPart": "Blood glucose",
-        "textCleaned": "Blood glucose",
-        "textRepres": "Blood glucose",
-        "unitPart": "mg/dL",
-        "unitCleaned": "mg/dL",
-        "unitRepres": "mg/dL",
-        "type": "attribute",
-        "populationNumber": 20
-        }
-    '''
-    # 사전을 불러오기 때문에 클래스 객체를 먼저 생성한다.
-    st_module = Semantic()
-    output = st_module.tagged_header("Blood glucose( mg/dL), n = 20")
 
-    # 출력
+    '''
+    이전 버전 예시
+    '''
     # print("-"*50)
+    # st_module = Semantic()
+    # output = st_module.tagged_header("Blood glucose( mg/dL), n = 20")
     # print(json.dumps(output, indent=3))
     # print("-"*50)
 
@@ -638,11 +608,9 @@ if __name__ == "__main__":
             }
 
     '''
-
-
-    output = st_module.tagged_list_header([ "Yes BreakFast (n = 576)", "Without Supplement (n = 495)", "3 month", "n (%)" ])
-    # 출력
     # print("-"*50)
+    # st_module = Semantic()
+    # output = st_module.tagged_list_header([ "Yes BreakFast (n = 576)", "Without Supplement (n = 495)", "3 month", "n (%)" ])
     # print(json.dumps(output, indent=3))
     # print("-"*50)
 
@@ -651,20 +619,17 @@ if __name__ == "__main__":
     '''
     개발하면서 테스트 해보기 위한 아랫 영역
     '''
-    output = st_module.tagged_header("Blood glucose (n=10) (n)%")
-
-    # 출력
+    st_module = Semantic()
     # print("-"*50)
+    # output = st_module.tagged_header("Blood glucose (n=10) (n)%")
     # print(json.dumps(output, indent=3))
     # print("-"*50)
-
+    print("-"*50)
     output = st_module.tagged_list_header([
                          "Model 1",
                                 "OR (95% CI)",
                                 ". . . . . P",
                                 "J • ■ • : 1.04(0.99-1.09)"
                     ])
-    # 출력
-    print("-"*50)
     print(json.dumps(output, indent=3))
     print("-"*50)
