@@ -8,6 +8,8 @@ nohup python te-flask.py > log_flask/log_20200922.out & # 적절한 로그 파�
 ```
 
 ## 프로젝트 구조
+### 인터페이스 공유 시트
+* [CJ POC 프로그램 관련 정보](https://docs.google.com/spreadsheets/d/1MTOvsqR5fprjvYWZR9tSOlbKHGlAPDNuWUeYqt21Ow0/edit?usp=sharing)
 ### OCR 모듈
 * abbyy
 ### Table 추출 모듈
