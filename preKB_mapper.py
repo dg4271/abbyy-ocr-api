@@ -4,17 +4,17 @@ import pandas as pd
 import csv
 from collections import defaultdict
 
-from table_semantic_tagging.semantic_tagging import * 
+from table_semantic_tagging.semantic_tagging import *  
 from table_semantic_tagging.value_regularizer import * 
-from xml_to_table.table_extractor import * 
-
+from xml_to_table.table_extractor import *   
+   
 class GroupInfo:
     def __init__(self, groupName="", timeline="", attribute="", value_1="", unit_1="", 
                  value_2="", unit_2="", std="", min="", max="", terms=""):
         self.groupName = groupName
         self.timeline = timeline
         self.attribute = attribute
-        self.value_1 = value_1
+        self.value_1 = value_1 
         self.unit_1 = unit_1
         self.value_2 = value_2
         self.unit_2 = unit_2
@@ -276,15 +276,16 @@ def req_sents(doc_id):
     except:
         return None
 
-def req_methods(json_data):
+def req_methods(json_data, window_size=1):
     BIOBERT_API = "http://211.109.9.141:3164/biobert"
     try:
+        json_data['windowSize'] = window_size
         r = requests.post(url=BIOBERT_API, json=json_data)
         return r.json()
     except:
         return None
 
-def get_biobert_result(doc_id):
+def get_biobert_result(doc_id, window_size=1):
     """
     INPUT: doc_id
     OUTPUT: biobert result (geneInfo, treatmentInfo ...)
@@ -293,7 +294,7 @@ def get_biobert_result(doc_id):
     """
     biobert_result  = None 
 
-    CACHE_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/biobert_info_cache/"
+    CACHE_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/biobert_info_cache/"+str(window_size)+"/"
     if doc_id+".json" in os.listdir(CACHE_PATH):
         with open(CACHE_PATH+doc_id+".json") as json_file:
             biobert_result = json.load(json_file)
@@ -304,7 +305,7 @@ def get_biobert_result(doc_id):
             print("result of sents is None ", doc_id)
             return None
         
-        biobert_result = req_methods(sents_json)
+        biobert_result = req_methods(sents_json, window_size)
         if biobert_result is None:
             print("result of biobert is None ", doc_id)
             return None
@@ -313,10 +314,10 @@ def get_biobert_result(doc_id):
             json.dump(biobert_result, json_file, indent=4)    
     return biobert_result
 
-def from_unstructured(doc_id):
+def from_unstructured(doc_id, window_size):
 
     data = []
-    biobert_result = get_biobert_result(doc_id)
+    biobert_result = get_biobert_result(doc_id, window_size)
     if not biobert_result:
         return data
 
@@ -476,32 +477,48 @@ def from_structured(xml_path):
                     : header list을 Semantic Tagging의 Input으로 받을 수 있음
                 """                    
                 
-                if not cell["row_header"] or not cell["col_header"]:
-                    print("row or col header is empty")
-                    #print("cell: ", cell)
-                    continue
+                # if not cell["row_header"] or not cell["col_header"]:
+                #     print("row or col header is empty")
+                #     #print("cell: ", cell)
+                #     continue
 
-                try: 
-                    semantic_row_header = st_module.tagged_list_header(cell["row_header"])
-                    semantic_col_header = st_module.tagged_list_header(cell["col_header"])
-                except Exception as e:
-                    print("semantic module failed")
-                    #print("cell: ", cell)
-                    print("Error: ", e)
-                    continue
+                # try: 
+                #     semantic_row_header = st_module.tagged_list_header(cell["row_header"])
+                #     semantic_col_header = st_module.tagged_list_header(cell["col_header"])
+                # except Exception as e:
+                #     print("semantic module failed")
+                #     #print("cell: ", cell)
+                #     print("Error: ", e)
+                #     continue
                 
                 """
                 3. Value regularizer
                     - mean, SD, terms 추출
                 """
                 # regularzied_values = vr.regularize_value(cell["value"])
+                # try:
+                #     regularzied_values = vr.regularize_value_with_header(cell)
+                # except Exception as e:
+                #     print("value regularizer module error")
+                #     #print(cell)
+                #     print("Error: ", e)
+                #     continue
+
+                """
+                3. Semantic & Value regularizer
+                """
                 try:
-                    regularzied_values = vr.regularize_value_with_header(cell)
+                    regularzied_cell = vr.regularize_value_with_header(cell)
                 except Exception as e:
                     print("value regularizer module error")
                     #print(cell)
                     print("Error: ", e)
                     continue
+                
+                semantic_row_header = regularzied_cell['row_header']
+                semantic_col_header = regularzied_cell['col_header']
+                regularzied_values = regularzied_cell['value']
+                
 
                 #mean = None
                 value_1 = None
@@ -524,7 +541,7 @@ def from_structured(xml_path):
                             #print(p_value)
 
                         elif regularzied_value['type'] == "mean" or regularzied_value['type'] == "default" \
-                              or regularzied_value['type'] == "count" or regularzied_value['unit'] == "count":
+                             or regularzied_value['unit'] == "n":
                             
                             #print(value_1)
                             if not value_1: 
@@ -550,8 +567,14 @@ def from_structured(xml_path):
                             if type(regularzied_value['value']) is tuple:
                                 range_min = regularzied_value['value'][0]
                                 range_max = regularzied_value['value'][1]
+                                # 범위에 대한 단위가 출력되지 않아서 추가하였음 - 이욱
+                                if regularzied_value['unit'] != None:
+                                    unit_1 = regularzied_value['unit']
                             else:
                                 range_min = regularzied_value['value']
+                                # 범위에 대한 단위가 출력되지 않아서 추가하였음 - 이욱
+                                if regularzied_value['unit'] != None:
+                                    unit_1 = regularzied_value['unit']
 
                         
                         
@@ -559,10 +582,10 @@ def from_structured(xml_path):
                     print("regularizer parsing error", cell["value"])
                     print("Error: ", e)
                     if cell["value"]:
-                        terms = cell["value"]
+                        terms = cell["value"] 
 
                 """
-                4. semantic type 활용하여 group / attribute 구분
+                4. semantic type 활용하여 group / attribute 구분 
                 """
                 if semantic_row_header and semantic_col_header:
                     if semantic_row_header["type"] == "group" or semantic_col_header["type"] == "attribute":
@@ -584,10 +607,10 @@ def from_structured(xml_path):
                 #   - unit list중 마지막 element 사용 (header list의 마지막이 value와 연관성 높다고 판단) 
                 """
                 #unit = ""
-                if len(attribute_header["unit"]) != 0:
-                    unit_1 = attribute_header["unit"][-1]
-                elif len(group_header["unit"]) != 0:
-                    unit_1 = group_header["unit"][-1]
+                # if len(attribute_header["unit"]) != 0:
+                #     unit_1 = attribute_header["unit"][-1]
+                # elif len(group_header["unit"]) != 0:
+                #     unit_1 = group_header["unit"][-1]
 
                 if is_p_value and p_value:
                     row_p_values.append(p_value)
@@ -667,7 +690,7 @@ def preKB_to_xlsx(preKBJson, result_path):
 
     write_wb.save(result_path)
         
-def extract_preKB(xml_path, doc_id):
+def extract_preKB(xml_path, doc_id, window_size = 1):
     data = []
     try:
         data.extend(from_structured(xml_path))
@@ -675,7 +698,7 @@ def extract_preKB(xml_path, doc_id):
         print("from_structed error")
         print(e)
         data.append(Data("Table", [], [], []))
-    data.extend(from_unstructured(doc_id))
+    data.extend(from_unstructured(doc_id, window_size))
 
     return PreKB(0, data)
 
@@ -688,6 +711,16 @@ def get_fileName_docID_dict(dic_file_path="/data1/saltlux/CJPoc/table-extraction
 
     return fileName_docID_dict
 
+def get_fileName_evalName_dict(dic_file_path="/data1/saltlux/CJPoc/table-extraction/final_demo/file_evaluation_dic.csv"):
+    fileName_evalName_dict = {}
+    with open(dic_file_path,  encoding='utf-8-sig') as csvFile:
+        reader = csv.reader(csvFile, delimiter=',')
+        for row in reader:
+            fileName_evalName_dict[row[0]] = row[1]
+
+    return fileName_evalName_dict
+
+
 def get_semantic_tag(headerList):
     return Semantic().tagged_list_header(headerList)
 
@@ -698,21 +731,30 @@ def get_regularized_value(value):
 def get_regularized_value_with_header(hv):
     return ValueRegularizer().regularize_value_with_header(hv)
 
-def ke_bulk(BASE_DIR_PATH, OUT_DIR_PATH):
+def ke_bulk(BASE_DIR_PATH, OUT_DIR_PATH, window_size):
 
     xml_list = os.listdir(BASE_DIR_PATH)
     failed_xml_list = []
-
+    print(fileName_evalName_dict)
     for xml_file in xml_list:
         try:
             doc_id = fileName_docID_dict[xml_file]
             print("XML file", xml_file)
             print("Doc ID", doc_id)
-            result = extract_preKB(BASE_DIR_PATH+xml_file, doc_id).toJson()
+            result = extract_preKB(BASE_DIR_PATH+xml_file, doc_id, window_size).toJson()
 
-            file_name = "preKB_" + xml_file.split(".")[0]
-            if len(file_name) > 100:
-                file_name = file_name[:100]
+            file_name = "preKB_" + xml_file.split(".xml")[0]
+            if len(file_name) > 60:
+                file_name = file_name[:60]
+
+            try:
+                print(file_name + '.xlsx')
+                file_name = fileName_evalName_dict[file_name + '.xlsx']
+                file_name = file_name.split(".xlsx")[0]
+            except:
+                print("fileName doesn't exist in eval dic")
+
+
 
             # write json
             with open(OUT_DIR_PATH + file_name + ".json", 'w') as outFile:
@@ -735,6 +777,7 @@ if __name__ == "__main__":
     fileName_docID map
     """
     fileName_docID_dict = get_fileName_docID_dict()
+    fileName_evalName_dict = get_fileName_evalName_dict()
     
     """
     0. 지식 추출 (벌크)
@@ -742,20 +785,23 @@ if __name__ == "__main__":
     # BASE_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_xml_30/"
     # OUT_DIR_PATH = "/data1/saltlux/CJPoc/table-extraction/final_demo/task1_30/task1_table_result_30/"
     BASE_DIR_PATH_138 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_138/"
-    OUT_DIR_PATH_138 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_138/"
+    OUT_DIR_PATH_138 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_138/" 
     BASE_DIR_PATH_78 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_cj_78/"
     OUT_DIR_PATH_78 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/task2_result_78/"
+    BASE_DIR_PATH_7 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task4_7/xml_7/"
+    OUT_DIR_PATH_7 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task4_7/task4_result_7/"
+    BASE_DIR_PATH_17 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task5_17/xml_17/"
+    OUT_DIR_PATH_17 = "/data1/saltlux/CJPoc/table-extraction/final_demo/task5_17/task5_result_17/"
     
-        # Failed list
+    # Failed list
     # xml_list = []
     # with open(OUT_DIR_PATH + "failed_xml_list.txt") as failed_file:
     #     for line in failed_file:
     #         xml_list.append(line.rstrip())
 
-    # ke_bulk(BASE_DIR_PATH_138, OUT_DIR_PATH_138)
-
-    ke_bulk(BASE_DIR_PATH_78, OUT_DIR_PATH_78)
-    
+    ke_bulk(BASE_DIR_PATH_138, OUT_DIR_PATH_138, 1)
+    # ke_bulk(BASE_DIR_PATH_7, OUT_DIR_PATH_7, 1)
+    # ke_bulk(BASE_DIR_PATH_17, OUT_DIR_PATH_17, 1)
 
 
 

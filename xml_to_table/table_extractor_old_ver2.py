@@ -3,7 +3,6 @@ from xml_to_table.cell_tagger import is_value, cell_tagging
 from lxml import etree
 import pandas as pd
 import re
-from itertools import zip_longest
 
 def refine_html(html):
     html = re.sub('\<thead\>\n((.|\n)*)<\/thead\>\n', '',html)
@@ -13,6 +12,7 @@ def refine_html(html):
     return html
 
 def processRow(ns, row):
+    
     h_split_p = "[0-9]* (time) (\w+ )?[0-9]* (months|m|weeks)"
     rowInfos = []
     rowSpans = []
@@ -40,6 +40,7 @@ def processRow(ns, row):
             baseline = line.get("baseline")
             
             lines.append({"text" : text, "text_axis" : text_axis, "baseline" : baseline})
+        
         if len(line_text) == 1:
             if bool(re.fullmatch(h_split_p, line_text[0])) and colSpan == 2:
                 s_text = [m[0] for m in re.findall("([0-9]+ (time|months|m|weeks))", line_text[0])]
@@ -49,15 +50,15 @@ def processRow(ns, row):
                 rowInfos.extend([lines]*colSpan)
         else:
             rowInfos.extend([lines]*colSpan)
-        
+    
     return rowInfos, rowSpans
 
 def hv_extract(tags_t, text_table):
     from operator import itemgetter
     from itertools import groupby
     result = []
-    # ?�정?�요 ?�더 경계 구분 추�??�어????
-    # --> ?�단 ?�외 규칙???�무 많아 경계?�식?��? ?�음.
+    # ?�정?�요 ?�더 경계 구분 추�??�어????
+    # --> ?�단 ?�외 규칙???�무 많아 경계?�식?��? ?�음.
     #row_h_border = 0
     #col_h_border = 0  
     try:
@@ -65,22 +66,17 @@ def hv_extract(tags_t, text_table):
         c_len = len(tags_t[0])
         srow = None
         ssrow = None
-        sssrow = None
 
+        use_indent = False
+        use_srow = False
         for i in range(r_len):
             if tags_t[i][0] == 'srow':
                 srow = text_table[i][0]
-                ssrow = None
-                sssrow = None
             elif tags_t[i][0] == 'ssrow':
                 ssrow = text_table[i][0]
-                sssrow = None
-            elif tags_t[i][0] == 'sssrow':
-                sssrow = text_table[i][0]
             elif tags_t[i][0] != "indent": #stub, v
                 srow = None
                 ssrow = None
-                sssrow = None
 
             #row_stub_idx = [j for j in range(c_len) if not tags_t[i][j].startswith("v") and tags_t[i][j] != "empty"]
             row_stub_idx = []
@@ -111,8 +107,6 @@ def hv_extract(tags_t, text_table):
                         row_header.insert(0, srow)
                     if ssrow is not None:
                         row_header.insert(1, ssrow)
-                    if sssrow is not None:
-                        row_header.insert(2, sssrow)
 
                     row_header = list(map(itemgetter(0), groupby(row_header)))
 
@@ -156,7 +150,6 @@ def srow_process(tags, rows):
         if tags[i][0] in ["stub", "indent"] and i>0:
             text_axis = 0
             next_axis = 0
-            axis = []
             for line in rows[i][0]:
                 if text_axis ==0:
                     text_axis = int(line["text_axis"])
@@ -173,59 +166,13 @@ def srow_process(tags, rows):
                         elif tags[i][0] == "srow" and tags[i+1][0] == "stub":
                             tags[i][0] = "ssrow"
                             tags[i+1][0] = "indent"
-                    #?�전 ?�스가 ??��졌을??  
-                    elif 28 > text_axis > next_axis + 14:
+                    #?�전 ?�스가 ??��졌을??  
+                    elif text_axis > next_axis + 14:
                         continue
                     else:
                         if tags[i][0] == "indent" and tags[i+1][0] == "stub":
                             tags[i+1][0] = "indent"
     return tags
-
-
-def srow_process2(tags, rows):
-    """
-    srow/ssrow/indent tagging
-    """ 
-    idt_depth = []
-    tag_depth = ["indent"]
-    d = 0
-
-    for i, (rt, row) in enumerate(zip(tags, rows)): # row
-        
-        try:
-            idt = int(row[0][0]["text_axis"])
-        except:
-            continue
-
-        if rt[0] =="v" and len(idt_depth) == 0:
-            continue
-        
-        if rt[0] =="stub" and len(idt_depth) == 0:
-            idt_depth.append(idt)
-            continue
-            
-        if idt_depth[d] + 14 < idt:
-            if len(idt_depth)-1 == d:
-                idt_depth.append(idt)
-                tag_depth.insert(d, "s"*(d+1)+"row")
-            if tags[i-1][0] == "stub" or tags[i-1][0] in tag_depth:
-                tags[i-1][0] = tag_depth[d]
-                tags[i][0] = tag_depth[d+1]
-            d += 1
-            
-        elif idt_depth[d] - 14 > idt:
-            for j in range(len(idt_depth)-1):
-                if idt_depth[j] + 14 > idt:
-                    d = j
-                    tags[i][0] = tag_depth[d]
-                    break
-        else:
-            if tags[i-1][0] != "empty":
-                tags[i][0] = tags[i-1][0]
-            continue
-
-    return tags
-
 
 
 def xml_to_table(xml_path):
@@ -246,14 +193,16 @@ def xml_to_table(xml_path):
     for table in root.iter("{" + ns + "}" +"page"): # for all table/page
         page += 1
         axis = {}
-
         ## EXTRACT CAPTION
         for blk_n, block in enumerate(table.iter("{" + ns + "}" + "block")): # for all block            
             list_blockidx2lxmlidx.append( (page-1, blk_n) )
             ## EXTRACT CAPTION
 
             # Table detection
-            
+            rows=[]
+            text_table=[]
+            tags = []
+            row_n=0
             if block.get('blockType') == 'Table':
 
                 ## EXTRACT UPCAPTION
@@ -263,7 +212,7 @@ def xml_to_table(xml_path):
                 list_up_block = []
                 len_char_upblock = 0
                 upblock_loop_counter = 0
-                while len_char_upblock < 500 and table_blockidx - upblock_loop_counter >=0:
+                while len_char_upblock < 500:
                     upblock_loop_counter += 1
                     prev_page_num, prev_block_num = list_blockidx2lxmlidx[table_blockidx - upblock_loop_counter]
                     blockforupcap = root[prev_page_num][prev_block_num]
@@ -290,20 +239,9 @@ def xml_to_table(xml_path):
                 dict_upcaption_downcaption['upcaption'] = list_up_block
                 ## EXTRACT UPCAPTION
 
-                ## EXTRACT DOWNCAPTION
-                len_char_downblock = 0
-                dict_upcaption_downcaption['downcaption'] = []
-                ## EXTRACT DOWNCAPTION
-
-                #try:
                 axis = {"l" : block.get("l"),"r" : block.get("r"),"t" : block.get("t"),"b" : block.get("b")}
-                rows=[]
-                text_table=[]
-                tags = []
-                row_n=0
                 for row in block.iter("{" + ns + "}" + "row"): # for all row
                     rowTexts, rowSpans = processRow(ns,row)
-
                     if row_n >= len(rows):
                         rows.append(rowTexts)
                         if sum(rowSpans)>0:
@@ -317,65 +255,42 @@ def xml_to_table(xml_path):
                         for i in range(len(rest_idx)):
                             rows[row_n][rest_idx[i]] = rowTexts[i]
                             for j in range(rowSpans[i]):
-                                    #rows[row_n+j+1][rest_idx[i]] = rowTexts[i]
-                                if row_n+j+1 < len(rows):
-                                    rows[row_n+j+1][rest_idx[i]] = rowTexts[i]
-                                else:
-                                    rows.extend([["spans"]*len(rows[row_n+j]) for _ in range(max(rowSpans))])
-                                    rows[row_n+j+1][rest_idx[i]] = rowTexts[i]
+                                rows[row_n+j+1][rest_idx[i]] = rowTexts[i]
                     row_n+=1
 
-                split_rows = []
-                for row in rows:
-                    len_set = set([len(a) for a in row if len(a) != 0])
-                    if len(len_set) == 1 and len(row[0])>1:
-                        for z in list(zip_longest(*[r for r in row], fillvalue=None)):
-                            split_rows.append([[x] if x is not None else []  for x in list(z)])
-                        #for a in zip(*row):
-                        #    split_rows.append([[x] for x in list(a)])
-                    #srow/indent merged case
-                    elif len(row[0]) == 2 and int(row[0][0]["text_axis"]) + 14 < int(row[0][1]["text_axis"]):
-                        for z in reversed(list(zip_longest(*[reversed(r) for r in row], fillvalue=None))):
-                            split_rows.append([[x] if x is not None else []  for x in list(z)])
-                    #indent/srow merged case
-                    elif len(row[0]) == 2 and int(row[0][0]["text_axis"]) - 14 > int(row[0][1]["text_axis"]):
-                        for z in list(zip_longest(*[r for r in row], fillvalue=None)):
-                            split_rows.append([[x] if x is not None else []  for x in list(z)])
-                    else:
-                        split_rows.append(row)
-                    
-
-                    # info -> 2d-table , info --> tags
-                text_table, tags = text_tag_split(split_rows)
-                    # srow/ssrow/indent tag 변??
-                    #tags = srow_process(tags, rows)             
-                tags = srow_process2(tags, split_rows)
-
-                    # table caption ?�거: 첫번�?row가 Table�??�작?�면 ?�당 row ??��
-                while text_table[0][0].lower().startswith("table") or len(set(text_table[0])) == 1:
+                #info -> split lines(?�요??경우)
+                
+                # info -> 2d-table , info --> tags
+                text_table, tags = text_tag_split(rows)
+                if text_table[0][0].lower().startswith("table"):
                     text_table = text_table[1:]
                     tags = tags[1:]
-
-
-                    # hv_extract
+                    rows = rows[1:]
+                
+                # srow/ssrow/indent tag 변??                
+                tags = srow_process(tags, rows)
+                # hv_extract
                 hv = hv_extract(tags, text_table)
 
-                    
+                ## EXTRACT DOWNCAPTION
+                len_char_downblock = 0
+                dict_upcaption_downcaption['downcaption'] = []
+                ## EXTRACT DOWNCAPTION
+
 
                 tables["tableViewInfos"].append(
-                        {
-                            "table": text_table,
-                            "table_html": None,
-                            #"table_html": refine_html(pd.DataFrame(text_table).to_html()),
-                            "axis" : axis,
-                            "page" : page,
-                            "hv": hv,
-                            "table_type": None,
-                            "upcaption":dict_upcaption_downcaption['upcaption'],
-                            "downcaption":dict_upcaption_downcaption['downcaption']
-                        }
-                    )
-
+                    {
+                        "table": text_table,
+                        "table_html": None,
+                        #"table_html": refine_html(pd.DataFrame(text_table).to_html()),
+                        "axis" : axis,
+                        "page" : page,
+                        "hv": hv,
+                        "table_type": None,
+                        "upcaption":dict_upcaption_downcaption['upcaption'],
+                        "downcaption":dict_upcaption_downcaption['downcaption']
+                    }
+                )
 
             ## EXTRACT DOWNCAPTION
             elif dict_upcaption_downcaption != None and len_char_downblock < 500:
@@ -399,13 +314,10 @@ def xml_to_table(xml_path):
                 dict_upcaption_downcaption['downcaption'].append(down_block)
                 len_char_downblock += len(down_block)
                 ## EXTRACT DOWNCAPTION
-                
 
     return tables
 
 if __name__ == "__main__":
-    #print(xml_to_table('task1_30/xml_test/2010_S0021915010002431_NOS3 gene polymorphisms are as.xml'))
-    #print(xml_to_table('task1_30/xml_test/2019_S1476927118307916_Conditional GWAS revealing gen.xml'))
-    print(xml_to_table('task2_error/2009_S0002870309003676_Association of genetic variant.xml'))
-    #xml_to_table('task2_error/Gsе?.xml')
-    #print(xml_to_table('task2_error/phy.xml'))
+    #print(xml_to_table('task2_error/2014_S2213858713702006_Vitamin D concentration obesit.xml'))
+    print(xml_to_table('/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_cj_78/Gsе?_deficiency_in_the_dorsomedial_hypothalamus_leads_to_obesity,_hyperphagia,_and_reduced_thermogenesis_associated_with_impaired_leptin_signaling.xml'))
+    

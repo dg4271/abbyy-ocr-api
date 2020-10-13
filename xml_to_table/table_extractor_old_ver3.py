@@ -3,7 +3,6 @@ from xml_to_table.cell_tagger import is_value, cell_tagging
 from lxml import etree
 import pandas as pd
 import re
-from itertools import zip_longest
 
 def refine_html(html):
     html = re.sub('\<thead\>\n((.|\n)*)<\/thead\>\n', '',html)
@@ -40,6 +39,7 @@ def processRow(ns, row):
             baseline = line.get("baseline")
             
             lines.append({"text" : text, "text_axis" : text_axis, "baseline" : baseline})
+            
         if len(line_text) == 1:
             if bool(re.fullmatch(h_split_p, line_text[0])) and colSpan == 2:
                 s_text = [m[0] for m in re.findall("([0-9]+ (time|months|m|weeks))", line_text[0])]
@@ -49,7 +49,7 @@ def processRow(ns, row):
                 rowInfos.extend([lines]*colSpan)
         else:
             rowInfos.extend([lines]*colSpan)
-        
+    
     return rowInfos, rowSpans
 
 def hv_extract(tags_t, text_table):
@@ -196,9 +196,6 @@ def srow_process2(tags, rows):
             idt = int(row[0][0]["text_axis"])
         except:
             continue
-
-        if rt[0] =="v" and len(idt_depth) == 0:
-            continue
         
         if rt[0] =="stub" and len(idt_depth) == 0:
             idt_depth.append(idt)
@@ -295,74 +292,70 @@ def xml_to_table(xml_path):
                 dict_upcaption_downcaption['downcaption'] = []
                 ## EXTRACT DOWNCAPTION
 
-                #try:
-                axis = {"l" : block.get("l"),"r" : block.get("r"),"t" : block.get("t"),"b" : block.get("b")}
-                rows=[]
-                text_table=[]
-                tags = []
-                row_n=0
-                for row in block.iter("{" + ns + "}" + "row"): # for all row
-                    rowTexts, rowSpans = processRow(ns,row)
+                try:
+                    axis = {"l" : block.get("l"),"r" : block.get("r"),"t" : block.get("t"),"b" : block.get("b")}
+                    rows=[]
+                    text_table=[]
+                    tags = []
+                    row_n=0
+                    for row in block.iter("{" + ns + "}" + "row"): # for all row
+                        rowTexts, rowSpans = processRow(ns,row)
 
-                    if row_n >= len(rows):
-                        rows.append(rowTexts)
-                        if sum(rowSpans)>0:
-                            rows.extend([["spans"]*len(rowSpans) for _ in range(max(rowSpans))])
-                            for i in range(len(rowSpans)):
+                        if row_n >= len(rows):
+                            rows.append(rowTexts)
+                            if sum(rowSpans)>0:
+                                rows.extend([["spans"]*len(rowSpans) for _ in range(max(rowSpans))])
+                                for i in range(len(rowSpans)):
+                                    for j in range(rowSpans[i]):
+                                        rows[row_n+j+1][i] = rowTexts[i]
+                        else:
+                            rest_idx = [i for i, value in enumerate(rows[row_n]) if value == "spans"]
+
+                            for i in range(len(rest_idx)):
+                                rows[row_n][rest_idx[i]] = rowTexts[i]
                                 for j in range(rowSpans[i]):
-                                    rows[row_n+j+1][i] = rowTexts[i]
-                    else:
-                        rest_idx = [i for i, value in enumerate(rows[row_n]) if value == "spans"]
-
-                        for i in range(len(rest_idx)):
-                            rows[row_n][rest_idx[i]] = rowTexts[i]
-                            for j in range(rowSpans[i]):
                                     #rows[row_n+j+1][rest_idx[i]] = rowTexts[i]
-                                if row_n+j+1 < len(rows):
-                                    rows[row_n+j+1][rest_idx[i]] = rowTexts[i]
-                                else:
-                                    rows.extend([["spans"]*len(rows[row_n+j]) for _ in range(max(rowSpans))])
-                                    rows[row_n+j+1][rest_idx[i]] = rowTexts[i]
-                    row_n+=1
+                                    if row_n+j+1 < len(rows):
+                                        rows[row_n+j+1][rest_idx[i]] = rowTexts[i]
+                                    else:
+                                        rows.extend([["spans"]*len(rows[row_n+j]) for _ in range(max(rowSpans))])
+                                        rows[row_n+j+1][rest_idx[i]] = rowTexts[i]
+                        row_n+=1
 
-                split_rows = []
-                for row in rows:
-                    len_set = set([len(a) for a in row if len(a) != 0])
-                    if len(len_set) == 1 and len(row[0])>1:
-                        for z in list(zip_longest(*[r for r in row], fillvalue=None)):
-                            split_rows.append([[x] if x is not None else []  for x in list(z)])
-                        #for a in zip(*row):
-                        #    split_rows.append([[x] for x in list(a)])
-                    #srow/indent merged case
-                    elif len(row[0]) == 2 and int(row[0][0]["text_axis"]) + 14 < int(row[0][1]["text_axis"]):
-                        for z in reversed(list(zip_longest(*[reversed(r) for r in row], fillvalue=None))):
-                            split_rows.append([[x] if x is not None else []  for x in list(z)])
-                    #indent/srow merged case
-                    elif len(row[0]) == 2 and int(row[0][0]["text_axis"]) - 14 > int(row[0][1]["text_axis"]):
-                        for z in list(zip_longest(*[r for r in row], fillvalue=None)):
-                            split_rows.append([[x] if x is not None else []  for x in list(z)])
-                    else:
-                        split_rows.append(row)
+                    split_rows = []
+                    for row in rows:
+                        len_set = set([len(a) for a in row if len(a) != 0])
+                        if len(len_set) == 1 and len(row[0])>1:
+                            for z in reversed(list(zip_longest(*[reversed(r) for r in row], fillvalue=None))):
+                                split_rows.append([[x] if x is not None else []  for x in list(z)])
+                        elif len(row[0]) == 2 and int(row[0][0]["text_axis"]) + 14 < int(row[0][1]["text_axis"]):
+                            for z in reversed(list(zip_longest(*[reversed(r) for r in row], fillvalue=None))):
+                                split_rows.append([[x] if x is not None else []  for x in list(z)])
+                        elif len(row[0]) == 2 and int(row[0][0]["text_axis"]) - 14 > int(row[0][1]["text_axis"]):
+                            for z in reversed(list(zip_longest(*[r for r in row], fillvalue=None))):
+                                split_rows.append([[x] if x is not None else []  for x in list(z)])
+                        else:
+                            split_rows.append(row)
                     
 
                     # info -> 2d-table , info --> tags
-                text_table, tags = text_tag_split(split_rows)
+                    text_table, tags = text_tag_split(rows)
                     # srow/ssrow/indent tag ë³€??
                     #tags = srow_process(tags, rows)             
-                tags = srow_process2(tags, split_rows)
+                    tags = srow_process2(tags, rows)
 
                     # table caption ?œê±°: ì²«ë²ˆì§?rowê°€ Tableë¡??œìž‘?˜ë©´ ?´ë‹¹ row ?? œ
-                while text_table[0][0].lower().startswith("table") or len(set(text_table[0])) == 1:
-                    text_table = text_table[1:]
-                    tags = tags[1:]
+                    while text_table[0][0].lower().startswith("table") or len(set(text_table[0])) == 1:
+                        text_table = text_table[1:]
+                        tags = tags[1:]
 
 
                     # hv_extract
-                hv = hv_extract(tags, text_table)
+                    hv = hv_extract(tags, text_table)
 
                     
 
-                tables["tableViewInfos"].append(
+                    tables["tableViewInfos"].append(
                         {
                             "table": text_table,
                             "table_html": None,
@@ -375,7 +368,20 @@ def xml_to_table(xml_path):
                             "downcaption":dict_upcaption_downcaption['downcaption']
                         }
                     )
-
+                except:
+                    tables["tableViewInfos"].append(
+                        {
+                            "table": [],
+                            "table_html": None,
+                            #"table_html": refine_html(pd.DataFrame(text_table).to_html()),
+                            "axis" : axis,
+                            "page" : page,
+                            "hv": [],
+                            "table_type": None,
+                            "upcaption":[],
+                            "downcaption":[]
+                        }
+                    )
 
             ## EXTRACT DOWNCAPTION
             elif dict_upcaption_downcaption != None and len_char_downblock < 500:
@@ -404,8 +410,8 @@ def xml_to_table(xml_path):
     return tables
 
 if __name__ == "__main__":
-    #print(xml_to_table('task1_30/xml_test/2010_S0021915010002431_NOS3 gene polymorphisms are as.xml'))
-    #print(xml_to_table('task1_30/xml_test/2019_S1476927118307916_Conditional GWAS revealing gen.xml'))
-    print(xml_to_table('task2_error/2009_S0002870309003676_Association of genetic variant.xml'))
+    print(xml_to_table("/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_138/2019_S1476927118307916_Conditional GWAS revealing gen.xml"))
+    #print(xml_to_table("/data1/saltlux/CJPoc/table-extraction/final_demo/task2_216/xml_138/2010_S0021915010002431_NOS3 gene polymorphisms are as.xml"))
+    #xml_to_table('task2_error/Upregulation.xml')
     #xml_to_table('task2_error/GsÐµ?.xml')
     #print(xml_to_table('task2_error/phy.xml'))
