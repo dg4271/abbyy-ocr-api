@@ -12,13 +12,13 @@ import table_extractor_test
 import table_view_extract
 import preKB_mapper
 from xml_to_table.table_extractor import * 
-from table_classifier.tableClassifier import is_collect_table, get_type
-from table_classifier.preprocessing import get_header_value_info_new
+#from table_classifier.tableClassifier import is_collect_table, get_type
+#from table_classifier.preprocessing import get_header_value_info_new
 
 
 
 # Flask
-UPLOAD_FOLDER = '/data1/saltlux/CJPoc/table-extraction/uploads'
+UPLOAD_FOLDER = '/data1/saltlux/CJPoc/paper/ocrFormat/'
 ALLOWED_EXTENSIONS = {'pdf'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -52,28 +52,57 @@ def allowed_file(filename):
 
 
 @app.route('/ocr/xml', methods=['POST'])
-def ocr():
+def ocr_xml():
     global processor
     if request.method == 'POST':
         app.logger.info('Processing default request - pdf')
-        if 'file' not in request.files:
-            #flash('No file part')
-            app.logger.info('No file part')  
-            return ''
-        file = request.files['file']
-        app.logger.info(file.filename)
-        if file and allowed_file(file.filename):
-            
-            # request???�일??upload ?�더???�?�하�?????file ?�용???�라�?
-            #file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
 
-            # request�??�어??file??ocr 결과 xml??반환
-            # 결과 xml?� UPLOAD_FOLDER???�?�됨
-            ocrXml = api(processor, file, app.config['UPLOAD_FOLDER'])
-            return ocrXml
+        # ocr using uploaded file
+        print(request.files)
+        if request.data and 'file' in json.loads(request.data).keys():
+            file_path = json.loads(request.data)['file']
+            result = {}
+            try:
+                with open(file_path, 'rb') as pdf_file:
+                    api(processor, pdf_file, file_path.split('/')[-1], app.config['UPLOAD_FOLDER'])
+                
+                result['result_code'] = 1
+                result['result_xml_path'] = app.config['UPLOAD_FOLDER']
+            except:
+                result['result_code'] = 0
+                result['result_xml_path'] = ""
 
-# 중간 보고 데모 용
-# def table_extractor_return(xml_path):
+            r = Response(response=json.dumps(result, indent=3), status=200, mimetype="application/json")
+            return r
+
+        else:
+            app.logger.info('No file part')
+            r = Response(response=json.dumps({'result_code':0, 'result_xml_path':""}, indent=3), status=200, mimetype="application/json")
+            return r
+
+@app.route('/ocr/xml/string', methods=['POST'])
+def ocr_xml_string():
+    global processor
+    if request.method == 'POST':
+        app.logger.info('Processing default request - pdf')
+
+        # ocr using uploaded file
+        print(request.files)
+        if request.files:
+            file = request.files['file']
+            app.logger.info(file.filename)
+            if file and allowed_file(file.filename):
+                # 결과 xml??UPLOAD_FOLDER???�?�됨
+                ocrXml = api(processor, file, file.filename, app.config['UPLOAD_FOLDER'])
+                return ocrXml
+        else:
+            app.logger.info('No file part')
+            r = Response(response=json.dumps({'result_code':0, 'result_xml_path':""}, indent=3), status=200, mimetype="application/json")
+            return r   
+
+
+
+# 중간 보고 ?�모 ??# def table_extractor_return(xml_path):
 
 #     if xml_path =="/data1/saltlux/CJPoc/table-extraction/uploads/85.xml":
 #         output_json = "85.json"
@@ -197,7 +226,7 @@ def table_extraction():
         else:
             xml_path = json.loads(request.data)['path']
             print(xml_path)
-            # 테이블 추출
+            # ?�이�?추출
             # ocrXml = request.data
             # rows = table_extractor_test.xml_to_list(ocrXml)
             # print(rows)
@@ -222,7 +251,7 @@ def text_extraction():
             xml_path = json.loads(request.data)['path']
             print(xml_path)
 
-            # DOC ID 확인
+            # DOC ID ?�인
             try:
                 doc_id = fileName_docID_dict[xml_path.split("/")[-1]]
             except Exception as e:
@@ -259,7 +288,7 @@ def preKB_extraction():
             print(request.data)
             xml_path = json.loads(request.data)['path']
 
-            # DOC ID 확인
+            # DOC ID ?�인
             try:
                 doc_id = fileName_docID_dict[xml_path.split("/")[-1]]
             except Exception as e:
@@ -299,4 +328,5 @@ if __name__ == "__main__":
     processor = AbbyyOnlineSdk()
     setup_processor()
     
-    app.run(host='0.0.0.0', port=5555, threaded=True, debug=True)
+    # app.run(host='0.0.0.0', port=5555, threaded=True, debug=True)
+    app.run(host='0.0.0.0', port=5555, threaded=True)
