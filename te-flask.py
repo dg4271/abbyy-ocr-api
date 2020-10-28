@@ -215,7 +215,47 @@ def hv_extraction():
                 print("Error: ", e)
                 return "table_type error"
 
-
+@app.route('/extractedPreKB/HeaderValueOCR', methods=['POST'])
+def hv_extraction_ocr():
+    if request.method == 'POST':
+        if request.content_type != 'application/json':
+            pass
+        else:
+            xml_path = json.loads(request.data)['xml_path']
+            pdf_path = json.loads(request.data)['pdf_path']
+            print("XML :", xml_path)
+            print("PDF :", pdf_path)
+              
+            try:  
+                extractedTables = xml_to_table_2(xml_path, pdf_path)["tableViewInfos"]
+            except Exception as e:
+                print("Header-Value extraction failed")
+                print(xml_path)
+                print("Error: ", e)
+                return "Header-Value extraction failed"  
+                
+             
+            try:
+                hv_list = []  
+                for i, extractedTable in enumerate(extractedTables):
+                    caption = []
+                    extractedTable['is_table'] = is_collect_table(extractedTable['table']) 
+                    caption.extend(extractedTable['upcaption'])
+                    caption.extend(extractedTable['downcaption'])
+                    captions, row_header_list, col_header_list = get_header_value_info_new(extractedTable, caption)
+                    table_type = get_type(captions, row_header_list, col_header_list)
+                    extractedTable['table_type'] = table_type
+                    hv_object = {"id": i, "table_type":extractedTable['table_type'], "hv":extractedTable["hv"]}
+                    hv_list.append(hv_object)
+                
+                result = {"hvs": hv_list}
+                r = Response(response=json.dumps(result, indent=3), status=200, mimetype="application/json")
+                return r
+            except Exception as e:
+                print("table_type error")
+                print(extractedTables)
+                print("Error: ", e)
+                return "table_type error"
 
         
 @app.route('/extractedPreKB/fromTable', methods=['POST'])

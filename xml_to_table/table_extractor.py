@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*- 
-from xml_to_table.cell_tagger import is_value, cell_tagging
+# from xml_to_table.cell_tagger import is_value, cell_tagging
+from cell_tagger import is_value, cell_tagging
 from lxml import etree
 import pandas as pd
 import re
 from itertools import zip_longest
+from ocrtable import tableextraction
 
 def refine_html(html):
     html = re.sub('\<thead\>\n((.|\n)*)<\/thead\>\n', '',html)
@@ -56,8 +58,8 @@ def hv_extract(tags_t, text_table):
     from operator import itemgetter
     from itertools import groupby
     result = []
-    # ?�정?�요 ?�더 경계 구분 추�??�어????
-    # --> ?�단 ?�외 규칙???�무 많아 경계?�식?��? ?�음.
+    # ?�정?�요 ?�더 경계 구분 추�??�어????
+    # --> ?�단 ?�외 규칙???�무 많아 경계?�식?��? ?�음.
     #row_h_border = 0
     #col_h_border = 0  
     try:
@@ -148,6 +150,19 @@ def text_tag_split(rows):
         tags.append(tag_row)
     return text_table, tags
 
+def text_tag_split_2(list_2dtable):
+    """
+    text_table : 2d table
+    tags: 2d table??tagging
+    """
+    list_2dtag = []
+    for row in list_2dtable:
+        list_tag = []
+        for cell in list_2dtable:
+            list_tag.append(is_value(cell))
+    
+    return list_tag
+
 def srow_process(tags, rows):
     """
     srow/ssrow/indent tagging
@@ -173,7 +188,7 @@ def srow_process(tags, rows):
                         elif tags[i][0] == "srow" and tags[i+1][0] == "stub":
                             tags[i][0] = "ssrow"
                             tags[i+1][0] = "indent"
-                    #?�전 ?�스가 ??��졌을??  
+                    #?�전 ?�스가 ??��졌을??  
                     elif 28 > text_axis > next_axis + 14:
                         continue
                     else:
@@ -225,7 +240,6 @@ def srow_process2(tags, rows):
             continue
 
     return tags
-
 
 
 def xml_to_table(xml_path):
@@ -343,15 +357,21 @@ def xml_to_table(xml_path):
                             split_rows.append([[x] if x is not None else []  for x in list(z)])
                     else:
                         split_rows.append(row)
-                    
-
+                
                     # info -> 2d-table , info --> tags
                 text_table, tags = text_tag_split(split_rows)
+                
+                BUFF = ''
+                for row in text_table:
+                    BUFF += '\t'.join(row) + '\n'
+                print(BUFF)
+                print("="*100)
+                
                     # srow/ssrow/indent tag 변??
                     #tags = srow_process(tags, rows)             
                 tags = srow_process2(tags, split_rows)
 
-                    # table caption ?�거: 첫번�?row가 Table�??�작?�면 ?�당 row ??��
+                    # table caption ?�거: 첫번�?row가 Table�??�작?�면 ?�당 row ??��
                 while text_table[0][0].lower().startswith("table") or len(set(text_table[0])) == 1:
                     text_table = text_table[1:]
                     tags = tags[1:]
@@ -403,9 +423,135 @@ def xml_to_table(xml_path):
 
     return tables
 
+def xml_to_table_2(xml_path, pdf_path):
+    
+    tables = {
+        "tableViewInfos" : []
+    }
+    tree = etree.parse(xml_path)
+    root = tree.getroot()
+    ns = root.nsmap[None]
+
+    ## EXTRACT CAPTION
+    list_blockidx2lxmlidx = [] ##
+    dict_upcaption_downcaption = None
+    ## EXTRACT CAPTION
+        
+    page = 0
+    for tree_page in root.iter("{" + ns + "}" +"page"): # for all table/page
+        page += 1
+        axis = {}
+        page_width, page_height = tree_page.attrib['width'], tree_page.attrib['height']
+
+        ## EXTRACT CAPTION
+        for blk_n, block in enumerate(tree_page.iter("{" + ns + "}" + "block")): # for all block
+            list_blockidx2lxmlidx.append( (page-1, blk_n) )
+            ## EXTRACT CAPTION
+
+            # Table detection
+            if block.get('blockType') == 'Table':
+
+                ## EXTRACT UPCAPTION
+                dict_upcaption_downcaption = {}
+                table_blockidx = len(list_blockidx2lxmlidx) - 1
+                
+                list_up_block = []
+                len_char_upblock = 0
+                upblock_loop_counter = 0
+                while len_char_upblock < 500 and table_blockidx - upblock_loop_counter >=0:
+                    upblock_loop_counter += 1
+                    prev_page_num, prev_block_num = list_blockidx2lxmlidx[table_blockidx - upblock_loop_counter]
+                    blockforupcap = root[prev_page_num][prev_block_num]
+                    
+                    list_upblock_char = []
+                    for charinfo in blockforupcap.iter("{" + ns + "}" + "charParams"):
+                        word_first = charinfo.get('wordfirst')
+                        if word_first != None and word_first == '1':
+                            list_upblock_char.append(' ' + charinfo.text)
+                        else:
+                            if charinfo.text == None:
+                                list_upblock_char.append("")
+                            else:
+                                list_upblock_char.append(charinfo.text)
+                    
+                    if len(list_upblock_char) == 0:
+                        continue
+                    
+                    up_block = ''.join(list_upblock_char).strip()
+                    up_block = re.sub('[ ]+', ' ', up_block)
+                    list_up_block.append(up_block)
+                    len_char_upblock += len(up_block)
+                list_up_block.reverse()
+                dict_upcaption_downcaption['upcaption'] = list_up_block
+                ## EXTRACT UPCAPTION
+
+                ## EXTRACT DOWNCAPTION
+                len_char_downblock = 0
+                dict_upcaption_downcaption['downcaption'] = []
+                ## EXTRACT DOWNCAPTION
+
+                abbyyxml_str = etree.tostring(block)
+                page_num = page - 1
+                PIL_image = tableextraction.convertPdfToImage(pdf_path, 500, page_num, page_width, page_height)
+                list_2dtable = tableextraction.getTableTSV(abbyyxml_str, PIL_image)
+                list_2dtag = text_tag_split_2(list_2dtable)
+                
+                BUFF = ''
+                for row in list_2dtable:
+                    BUFF += '\t'.join(row) + '\n'
+                print(BUFF)
+                print("="*100)
+                
+                # hv_extract
+                hv = hv_extract(list_2dtag, list_2dtable)
+
+                tables["tableViewInfos"].append(
+                        {
+                            "table": text_table,
+                            "table_html": None,
+                            #"table_html": refine_html(pd.DataFrame(text_table).to_html()),
+                            "axis" : axis,
+                            "page" : page,
+                            "hv": hv,
+                            "table_type": None,
+                            "upcaption":dict_upcaption_downcaption['upcaption'],
+                            "downcaption":dict_upcaption_downcaption['downcaption']
+                        }
+                    )
+
+
+            ## EXTRACT DOWNCAPTION
+            elif dict_upcaption_downcaption != None and len_char_downblock < 500:
+                
+                list_downblock_char = []
+                for charinfo in block.iter("{" + ns + "}" + "charParams"):
+                    word_first = charinfo.get('wordfirst')
+                    if word_first != None and word_first == '1':
+                        list_downblock_char.append(' ' + charinfo.text)
+                    else:
+                        if charinfo.text == None:
+                            list_downblock_char.append("")
+                        else:
+                            list_downblock_char.append(charinfo.text)
+                        #list_downblock_char.append(charinfo.text)
+
+                if len(list_downblock_char) == 0:
+                    continue
+                down_block = ''.join(list_downblock_char).strip()
+                down_block = re.sub('[ ]+', ' ', down_block)
+                dict_upcaption_downcaption['downcaption'].append(down_block)
+                len_char_downblock += len(down_block)
+                ## EXTRACT DOWNCAPTION
+                
+
+    return tables
+
 if __name__ == "__main__":
     #print(xml_to_table('task1_30/xml_test/2010_S0021915010002431_NOS3 gene polymorphisms are as.xml'))
     #print(xml_to_table('task1_30/xml_test/2019_S1476927118307916_Conditional GWAS revealing gen.xml'))
-    print(xml_to_table('task2_error/2009_S0002870309003676_Association of genetic variant.xml'))
+    # print(xml_to_table('task2_error/2009_S0002870309003676_Association of genetic variant.xml'))
     #xml_to_table('task2_error/Gsе?.xml')
     #print(xml_to_table('task2_error/phy.xml'))
+    # xml_to_table('./2009_S0002870309003676_Association of genetic variant.xml')
+    xml_to_table_2('./2009_S0002870309003676_Association of genetic variant.xml', '2009_S0002870309003676_Association of genetic variant.pdf')
+    # print(xml_to_table('./2009_S0002870309003676_Association of genetic variant.xml'))
