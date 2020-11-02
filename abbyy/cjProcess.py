@@ -8,11 +8,11 @@ import time
 from abbyy.AbbyyOnlineSdk import *
 
 
-def resultFilePath(pdfFile, result_path, output_format):
-	return os.path.join(result_path, pdfFile.filename.rsplit('.', 1)[0] + '.' + output_format)
+def resultFilePath(file_name, result_path, output_format):
+	return os.path.join(result_path, file_name.rsplit('.', 1)[0] + '.' + output_format)
 
 # Recognize a pdf file and return result to xml
-def api(processor, pdfFile, result_path, language='English', output_format='xml'):
+def api(processor, pdfFile, file_name, result_path, language='English', output_format='xml'):
 	print("Uploading..")
 	settings = ProcessingSettings()
 	settings.Language = language
@@ -48,13 +48,14 @@ def api(processor, pdfFile, result_path, language='English', output_format='xml'
 
 	if task.Status == "Completed":
 		if task.DownloadUrl is not None:
-			# file download 
-			xmlFilePath = resultFilePath(pdfFile, result_path, output_format)
+			# file download
+			xmlFilePath = resultFilePath(file_name, result_path, output_format)
+			print("OCR xml saved at {}".format(xmlFilePath))
 			processor.download_result(task, xmlFilePath)
-			print("Result was written")
 			xml_string = ''
 			with open(xmlFilePath, 'r') as file:
 				xml_string = file.read()
+			print("Result was written")
 			return xml_string
 			
 	else:

@@ -6,5 +6,5 @@ uploads/
 ocr-output/
 .vscode
 __pycache__/
-
+temp/
 
